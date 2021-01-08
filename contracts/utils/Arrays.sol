@@ -44,4 +44,37 @@ library Arrays {
             return low;
         }
     }
+
+    /**
+     * @dev Generates an array [0, 1, 2, ..., length -1 ].
+     * Time and space complexity O(n)
+     */
+    function range(uint256 length) internal pure returns (uint256[] memory result) {
+        result = new uint256[](length);
+        for (uint256 i = 0; i < result.length; ++i) {
+            result[i] = i;
+        }
+    }
+
+    /**
+     * @dev Transforms an array of uint256 using an uint256 → uint256 function pointer.
+     * Time and space complexity O(n)
+     */
+    function map(uint256[] memory self, function (uint256) view returns (uint256) op) internal view returns (uint256[] memory result) {
+        result = new uint256[](self.length);
+        for (uint256 i = 0; i < self.length; ++i) {
+            result[i] = op(self[i]);
+        }
+    }
+
+    /**
+     * @dev Reduced an array of uint256 using an uint256,uint256 → uint256 function pointer and an initial value.
+     * Time complexity O(n)
+     */
+    function reduce(uint256[] memory self, function (uint256, uint256) view returns (uint256) op, uint256 initial) internal view returns (uint256 result) {
+        result = initial;
+        for (uint256 i = 1; i < self.length; ++i) {
+            result = op(result, self[i]);
+        }
+    }
 }
