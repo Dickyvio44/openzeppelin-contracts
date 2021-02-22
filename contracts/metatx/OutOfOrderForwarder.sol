@@ -26,7 +26,7 @@ contract OutOfOrderForwarder is EIP712 {
 
     mapping(address => mapping(uint128 => uint128)) private _nonces;
 
-    constructor() EIP712("MinimalForwarder", "0.0.1") {}
+    constructor() EIP712("OutOfOrderForwarder", "0.0.1") {}
 
     function getNonce(address from) public view returns (uint256) {
         return uint256(_nonces[from][0]);
