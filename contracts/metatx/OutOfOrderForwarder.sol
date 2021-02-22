@@ -47,13 +47,13 @@ contract OutOfOrderForwarder is EIP712 {
             keccak256(req.data),
             req.validUntil
         ))).recover(signature);
-        return (_nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] == req.nonce % (1 << 128))
+        return (req.nonce % (1 << 128) == _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)])
             && (req.validUntil >= block.number || req.validUntil == 0)
             && (req.from == signer);
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
-        require(verify(req, signature), "MinimalForwarder: signature does not match request");
+        require(verify(req, signature), "OutOfOrderForwarder: signature does not match request");
         _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] += 1;
 
         // solhint-disable-next-line avoid-low-level-calls
