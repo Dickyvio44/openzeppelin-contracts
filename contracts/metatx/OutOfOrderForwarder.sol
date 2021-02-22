@@ -37,23 +37,13 @@ contract OutOfOrderForwarder is EIP712 {
     }
 
     function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
-        address signer = _hashTypedDataV4(keccak256(abi.encode(
-            TYPEHASH,
-            req.from,
-            req.to,
-            req.value,
-            req.gas,
-            req.nonce,
-            keccak256(req.data),
-            req.validUntil
-        ))).recover(signature);
-        return (req.nonce % (1 << 128) == _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)])
-            && (req.validUntil >= block.number || req.validUntil == 0)
-            && (req.from == signer);
+        return _verifyNonce(req) && _verifyDeadline(req) && _verifySig(req, signature);
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
-        require(verify(req, signature), "OutOfOrderForwarder: signature does not match request");
+        require(_verifyNonce(req), "OutOfOrderForwarder: invalid nonce");
+        require(_verifyDeadline(req), "OutOfOrderForwarder: invalid deadline");
+        require(_verifySig(req, signature), "OutOfOrderForwarder: invalid signature");
         _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] += 1;
 
         // solhint-disable-next-line avoid-low-level-calls
@@ -63,5 +53,26 @@ contract OutOfOrderForwarder is EIP712 {
         assert(gasleft() > req.gas / 63);
 
         return (success, returndata);
+    }
+
+    function _verifyNonce(ForwardRequest memory req) internal view returns (bool) {
+        return _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] == req.nonce % (1 << 128);
+    }
+
+    function _verifyDeadline(ForwardRequest memory req) internal view returns (bool) {
+        return req.validUntil >= block.number || req.validUntil == 0;
+    }
+
+    function _verifySig(ForwardRequest memory req, bytes memory signature) internal view returns (bool) {
+        return req.from == _hashTypedDataV4(keccak256(abi.encode(
+            TYPEHASH,
+            req.from,
+            req.to,
+            req.value,
+            req.gas,
+            req.nonce,
+            keccak256(req.data),
+            req.validUntil
+        ))).recover(signature);
     }
 }
