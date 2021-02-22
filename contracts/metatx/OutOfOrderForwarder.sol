@@ -19,9 +19,10 @@ contract OutOfOrderForwarder is EIP712 {
         uint256 gas;
         uint256 nonce;
         bytes data;
+        uint256 validUntil;
     }
 
-    bytes32 private constant TYPEHASH = keccak256("ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)");
+    bytes32 private constant TYPEHASH = keccak256("ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data,uint256 validUntil)");
 
     mapping(address => mapping(uint128 => uint128)) private _nonces;
 
@@ -43,10 +44,12 @@ contract OutOfOrderForwarder is EIP712 {
             req.value,
             req.gas,
             req.nonce,
-            keccak256(req.data)
+            keccak256(req.data),
+            req.validUntil
         ))).recover(signature);
-        return _nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] == req.nonce % (1 << 128)
-            && signer == req.from;
+        return (_nonces[req.from][SafeCast.toUint128(req.nonce >> 128)] == req.nonce % (1 << 128))
+            && (req.validUntil >= block.number || req.validUntil == 0)
+            && (req.from == signer);
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
