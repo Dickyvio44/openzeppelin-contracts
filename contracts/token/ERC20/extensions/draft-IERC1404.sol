@@ -2,7 +2,7 @@
 
 pragma solidity >=0.6.0 <0.9.0;
 
-import "./IERC20.sol";
+import "../IERC20.sol";
 
 /**
  * @dev Interface of the ERC1404 standard as defined in the EIP.

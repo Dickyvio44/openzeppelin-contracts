@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "./ERC20.sol";
-import "./IERC1404.sol";
-import "../../utils/Strings.sol";
+import "./draft-IERC1404.sol";
+import "../ERC20.sol";
+import "../../../utils/Strings.sol";
 
 /**
  * @title ERC-1404: Simple Restricted Token Standard
