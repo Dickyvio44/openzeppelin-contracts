@@ -53,10 +53,18 @@ library EnumerableSet {
      */
     function _add(Set storage set, bytes32 value) private returns (bool) {
         if (!_contains(set, value)) {
-            set._values.push(value);
-            // The value is stored at length-1, but we add 1 to all indexes
-            // and use 0 as a sentinel value
-            set._indexes[value] = set._values.length;
+            uint256 last = set._values.length;
+            assembly {
+                let p := mload(0x40)
+                mstore(p, set.slot)
+                let blk := keccak256(p, 0x20)
+                // push new value
+                sstore(add(blk, last), value)
+                // update array length
+                last := add(last, 1)
+                sstore(set.slot, last)
+            }
+            set._indexes[value] = last; // has been decremented in assembly
             return true;
         } else {
             return false;
@@ -74,27 +82,20 @@ library EnumerableSet {
         uint256 valueIndex = set._indexes[value];
 
         if (valueIndex != 0) { // Equivalent to contains(set, value)
-            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in
-            // the array, and then remove the last element (sometimes called as 'swap and pop').
-            // This modifies the order of the array, as noted in {at}.
-
-            uint256 toDeleteIndex = valueIndex - 1;
-            uint256 lastIndex = set._values.length - 1;
-
-            // When the value to delete is the last one, the swap operation is unnecessary. However, since this occurs
-            // so rarely, we still do the swap anyway to avoid the gas cost of adding an 'if' statement.
-
-            bytes32 lastvalue = set._values[lastIndex];
-
-            // Move the last value to the index where the value to delete is
-            set._values[toDeleteIndex] = lastvalue;
-            // Update the index for the moved value
-            set._indexes[lastvalue] = toDeleteIndex + 1; // All indexes are 1-based
-
-            // Delete the slot where the moved value was stored
-            set._values.pop();
-
-            // Delete the index for the deleted slot
+            uint256 last = set._values.length - 1;
+            bytes32 tmp;
+            assembly {
+                let p := mload(0x40)
+                mstore(p, set.slot)
+                let blk := keccak256(p, 0x20)
+                // decrement array length
+                sstore(set.slot, last)
+                // swap last element with removed element
+                tmp := sload(add(blk, last))
+                sstore(add(blk, sub(valueIndex, 1)), tmp)
+                sstore(add(blk, last), 0)
+            }
+            set._indexes[tmp] = valueIndex;
             delete set._indexes[value];
 
             return true;
