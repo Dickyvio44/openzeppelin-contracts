@@ -92,8 +92,10 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         uint256[] memory batchBalances = new uint256[](accounts.length);
 
-        for (uint256 i = 0; i < accounts.length; ++i) {
-            batchBalances[i] = balanceOf(accounts[i], ids[i]);
+        unchecked {  // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < accounts.length; ++i) {
+                batchBalances[i] = balanceOf(accounts[i], ids[i]);
+            }
         }
 
         return batchBalances;
@@ -142,8 +144,10 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         uint256 fromBalance = _balances[id][from];
         require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
-        _balances[id][from] = fromBalance - amount;
-        _balances[id][to] += amount;
+        unchecked {
+            _balances[id][from] = fromBalance - amount;
+            _balances[id][to] += amount;
+        }
 
         emit TransferSingle(operator, from, to, id, amount);
 
@@ -175,14 +179,16 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
-        for (uint256 i = 0; i < ids.length; ++i) {
-            uint256 id = ids[i];
-            uint256 amount = amounts[i];
+        unchecked {
+            for (uint256 i = 0; i < ids.length; ++i) {
+                uint256 id = ids[i];
+                uint256 amount = amounts[i];
 
-            uint256 fromBalance = _balances[id][from];
-            require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
-            _balances[id][from] = fromBalance - amount;
-            _balances[id][to] += amount;
+                uint256 fromBalance = _balances[id][from];
+                require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
+                _balances[id][from] = fromBalance - amount;
+                _balances[id][to] += amount;
+            }
         }
 
         emit TransferBatch(operator, from, to, ids, amounts);
@@ -254,8 +260,8 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
-        for (uint i = 0; i < ids.length; i++) {
-            _balances[ids[i]][to] += amounts[i];
+        for (uint i = 0; i < ids.length; i++) { // doesn't need overflow protection
+            _balances[ids[i]][to] += amounts[i]; // needs overflow protection
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
@@ -280,7 +286,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         uint256 accountBalance = _balances[id][account];
         require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
-        _balances[id][account] = accountBalance - amount;
+        unchecked {
+            _balances[id][account] = accountBalance - amount;
+        }
 
         emit TransferSingle(operator, account, address(0), id, amount);
     }
@@ -300,13 +308,15 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, account, address(0), ids, amounts, "");
 
-        for (uint i = 0; i < ids.length; i++) {
-            uint256 id = ids[i];
-            uint256 amount = amounts[i];
+        unchecked {
+            for (uint i = 0; i < ids.length; i++) {
+                uint256 id = ids[i];
+                uint256 amount = amounts[i];
 
-            uint256 accountBalance = _balances[id][account];
-            require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
-            _balances[id][account] = accountBalance - amount;
+                uint256 accountBalance = _balances[id][account];
+                require(accountBalance >= amount, "ERC1155: burn amount exceeds balance");
+                _balances[id][account] = accountBalance - amount;
+            }
         }
 
         emit TransferBatch(operator, account, address(0), ids, amounts);

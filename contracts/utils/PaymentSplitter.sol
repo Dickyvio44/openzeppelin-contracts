@@ -43,8 +43,10 @@ contract PaymentSplitter is Context {
         require(payees.length == shares_.length, "PaymentSplitter: payees and shares length mismatch");
         require(payees.length > 0, "PaymentSplitter: no payees");
 
-        for (uint256 i = 0; i < payees.length; i++) {
-            _addPayee(payees[i], shares_[i]);
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < payees.length; i++) {
+                _addPayee(payees[i], shares_[i]);
+            }
         }
     }
 
@@ -108,8 +110,8 @@ contract PaymentSplitter is Context {
 
         require(payment != 0, "PaymentSplitter: account is not due payment");
 
-        _released[account] = _released[account] + payment;
-        _totalReleased = _totalReleased + payment;
+        _released[account] += payment;
+        _totalReleased += payment;
 
         Address.sendValue(account, payment);
         emit PaymentReleased(account, payment);

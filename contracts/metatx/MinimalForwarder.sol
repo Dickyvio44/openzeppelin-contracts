@@ -2,6 +2,7 @@
 
 pragma solidity ^0.8.0;
 
+import "../utils/Counters.sol";
 import "../utils/cryptography/ECDSA.sol";
 import "../utils/cryptography/draft-EIP712.sol";
 
@@ -10,6 +11,7 @@ import "../utils/cryptography/draft-EIP712.sol";
  */
 contract MinimalForwarder is EIP712 {
     using ECDSA for bytes32;
+    using Counters for Counters.Counter;
 
     struct ForwardRequest {
         address from;
@@ -22,12 +24,12 @@ contract MinimalForwarder is EIP712 {
 
     bytes32 private constant TYPEHASH = keccak256("ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)");
 
-    mapping(address => uint256) private _nonces;
+    mapping(address => Counters.Counter) private _nonces;
 
     constructor() EIP712("MinimalForwarder", "0.0.1") {}
 
     function getNonce(address from) public view returns (uint256) {
-        return _nonces[from];
+        return _nonces[from].current();
     }
 
     function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {
@@ -40,18 +42,20 @@ contract MinimalForwarder is EIP712 {
             req.nonce,
             keccak256(req.data)
         ))).recover(signature);
-        return _nonces[req.from] == req.nonce && signer == req.from;
+        return _nonces[req.from].current() == req.nonce && signer == req.from;
     }
 
     function execute(ForwardRequest calldata req, bytes calldata signature) public payable returns (bool, bytes memory) {
         require(verify(req, signature), "MinimalForwarder: signature does not match request");
-        _nonces[req.from] = req.nonce + 1;
+        _nonces[req.from].increment();
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returndata) = req.to.call{gas: req.gas, value: req.value}(abi.encodePacked(req.data, req.from));
-        // Validate that the relayer has sent enough gas for the call.
-        // See https://ronan.eth.link/blog/ethereum-gas-dangers/
-        assert(gasleft() > req.gas / 63);
+        unchecked {
+            // Validate that the relayer has sent enough gas for the call.
+            // See https://ronan.eth.link/blog/ethereum-gas-dangers/
+            assert(gasleft() > req.gas / 63);
+        }
 
         return (success, returndata);
     }

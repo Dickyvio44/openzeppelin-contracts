@@ -61,13 +61,17 @@ contract TimelockController is AccessControl {
         _setupRole(TIMELOCK_ADMIN_ROLE, address(this));
 
         // register proposers
-        for (uint256 i = 0; i < proposers.length; ++i) {
-            _setupRole(PROPOSER_ROLE, proposers[i]);
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < proposers.length; ++i) {
+                _setupRole(PROPOSER_ROLE, proposers[i]);
+            }
         }
 
         // register executors
-        for (uint256 i = 0; i < executors.length; ++i) {
-            _setupRole(EXECUTOR_ROLE, executors[i]);
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < executors.length; ++i) {
+                _setupRole(EXECUTOR_ROLE, executors[i]);
+            }
         }
 
         _minDelay = minDelay;
@@ -184,8 +188,10 @@ contract TimelockController is AccessControl {
 
         bytes32 id = hashOperationBatch(targets, values, datas, predecessor, salt);
         _schedule(id, delay);
-        for (uint256 i = 0; i < targets.length; ++i) {
-            emit CallScheduled(id, i, targets[i], values[i], datas[i], predecessor, delay);
+        unchecked {  // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < targets.length; ++i) {
+                emit CallScheduled(id, i, targets[i], values[i], datas[i], predecessor, delay);
+            }
         }
     }
 
@@ -196,7 +202,7 @@ contract TimelockController is AccessControl {
         require(!isOperation(id), "TimelockController: operation already scheduled");
         require(delay >= getMinDelay(), "TimelockController: insufficient delay");
         // solhint-disable-next-line not-rely-on-time
-        _timestamps[id] = block.timestamp + delay;
+        _timestamps[id] = block.timestamp + delay; // needs safemath
     }
 
     /**
@@ -244,8 +250,10 @@ contract TimelockController is AccessControl {
 
         bytes32 id = hashOperationBatch(targets, values, datas, predecessor, salt);
         _beforeCall(predecessor);
-        for (uint256 i = 0; i < targets.length; ++i) {
-            _call(id, i, targets[i], values[i], datas[i]);
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < targets.length; ++i) {
+                _call(id, i, targets[i], values[i], datas[i]);
+            }
         }
         _afterCall(id);
     }

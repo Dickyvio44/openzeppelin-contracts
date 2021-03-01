@@ -8,6 +8,7 @@ import "./extensions/IERC721Metadata.sol";
 import "./extensions/IERC721Enumerable.sol";
 import "../../utils/Address.sol";
 import "../../utils/Context.sol";
+import "../../utils/Counters.sol";
 import "../../utils/Strings.sol";
 import "../../utils/introspection/ERC165.sol";
 
@@ -19,6 +20,7 @@ import "../../utils/introspection/ERC165.sol";
 contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
+    using Counters for Counters.Counter;
 
     // Token name
     string private _name;
@@ -30,7 +32,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
     mapping (uint256 => address) private _owners;
 
     // Mapping owner address to token count
-    mapping (address => uint256) private _balances;
+    mapping (address => Counters.Counter) private _balances;
 
     // Mapping from token ID to approved address
     mapping (uint256 => address) private _tokenApprovals;
@@ -60,7 +62,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
      */
     function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ERC721: balance query for the zero address");
-        return _balances[owner];
+        return _balances[owner].current();
     }
 
     /**
@@ -260,7 +262,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
 
         _beforeTokenTransfer(address(0), to, tokenId);
 
-        _balances[to] += 1;
+        _balances[to].increment();
         _owners[tokenId] = to;
 
         emit Transfer(address(0), to, tokenId);
@@ -284,7 +286,7 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         // Clear approvals
         _approve(address(0), tokenId);
 
-        _balances[owner] -= 1;
+        _balances[owner].decrement();
         delete _owners[tokenId];
 
         emit Transfer(owner, address(0), tokenId);
@@ -310,8 +312,8 @@ contract ERC721 is Context, ERC165, IERC721, IERC721Metadata {
         // Clear approvals from the previous owner
         _approve(address(0), tokenId);
 
-        _balances[from] -= 1;
-        _balances[to] += 1;
+        _balances[from].decrement();
+        _balances[to].increment();
         _owners[tokenId] = to;
 
         emit Transfer(from, to, tokenId);

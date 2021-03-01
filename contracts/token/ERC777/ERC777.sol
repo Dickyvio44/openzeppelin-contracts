@@ -65,8 +65,10 @@ contract ERC777 is Context, IERC777, IERC20 {
         _symbol = symbol_;
 
         _defaultOperatorsArray = defaultOperators_;
-        for (uint256 i = 0; i < _defaultOperatorsArray.length; i++) {
-            _defaultOperators[_defaultOperatorsArray[i]] = true;
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < _defaultOperatorsArray.length; i++) {
+                _defaultOperators[_defaultOperatorsArray[i]] = true;
+            }
         }
 
         // register interfaces
@@ -321,7 +323,9 @@ contract ERC777 is Context, IERC777, IERC20 {
 
         // Update state variables
         _totalSupply += amount;
-        _balances[account] += amount;
+        unchecked {
+            _balances[account] += amount;
+        }
 
         _callTokensReceived(operator, address(0), account, amount, userData, operatorData, true);
 
@@ -388,8 +392,10 @@ contract ERC777 is Context, IERC777, IERC20 {
         // Update state variables
         uint256 fromBalance = _balances[from];
         require(fromBalance >= amount, "ERC777: burn amount exceeds balance");
-        _balances[from] = fromBalance - amount;
-        _totalSupply -= amount;
+        unchecked {
+            _balances[from] = fromBalance - amount;
+            _totalSupply -= amount;
+        }
 
         emit Burned(operator, from, amount, data, operatorData);
         emit Transfer(from, address(0), amount);
@@ -409,8 +415,10 @@ contract ERC777 is Context, IERC777, IERC20 {
 
         uint256 fromBalance = _balances[from];
         require(fromBalance >= amount, "ERC777: transfer amount exceeds balance");
-        _balances[from] = fromBalance - amount;
-        _balances[to] += amount;
+        unchecked {
+            _balances[from] = fromBalance - amount;
+            _balances[to] += amount;
+        }
 
         emit Sent(operator, from, to, amount, userData, operatorData);
         emit Transfer(from, to, amount);

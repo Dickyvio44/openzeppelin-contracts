@@ -54,8 +54,10 @@ library ERC165Checker {
         // query support of ERC165 itself
         if (supportsERC165(account)) {
             // query support of each interface in interfaceIds
-            for (uint256 i = 0; i < interfaceIds.length; i++) {
-                interfaceIdsSupported[i] = _supportsERC165Interface(account, interfaceIds[i]);
+            unchecked { // ++i operation in loop doesn't need safemath
+                for (uint256 i = 0; i < interfaceIds.length; ++i) {
+                    interfaceIdsSupported[i] = _supportsERC165Interface(account, interfaceIds[i]);
+                }
             }
         }
 
@@ -78,9 +80,11 @@ library ERC165Checker {
         }
 
         // query support of each interface in _interfaceIds
-        for (uint256 i = 0; i < interfaceIds.length; i++) {
-            if (!_supportsERC165Interface(account, interfaceIds[i])) {
-                return false;
+        unchecked { // ++i operation in loop doesn't need safemath
+            for (uint256 i = 0; i < interfaceIds.length; ++i) {
+                if (!_supportsERC165Interface(account, interfaceIds[i])) {
+                    return false;
+                }
             }
         }
 
