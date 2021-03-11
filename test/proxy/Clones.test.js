@@ -51,4 +51,20 @@ contract('Clones', function (accounts) {
       );
     });
   });
+
+  describe('isClone', function () {
+    beforeEach(async function () {
+      this.factory = await ClonesMock.new();
+      const receipt = await this.factory.clone(this.factory.address, '0x');
+      this.clone = receipt.logs.find(({ event }) => event === 'NewInstance').args.instance;
+    });
+
+    it('recognise clone', async function () {
+      expect(await this.factory.isClone(this.factory.address, this.clone)).to.be.equal(true);
+    });
+
+    it('recognise clone', async function () {
+      expect(await this.factory.isClone(this.factory.address, this.factory.address)).to.be.equal(false);
+    });
+  });
 });

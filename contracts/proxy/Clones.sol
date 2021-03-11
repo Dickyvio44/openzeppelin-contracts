@@ -75,4 +75,24 @@ library Clones {
     function predictDeterministicAddress(address implementation, bytes32 salt) internal view returns (address predicted) {
         return predictDeterministicAddress(implementation, salt, address(this));
     }
+
+    /**
+     * @dev Return weither `query` is a clone that mimics the behaviour of `implementation`.
+     */
+    function isClone(address implementation, address query) internal view returns (bool result) {
+        bytes20 implementationBytes = bytes20(implementation);
+        assembly {
+            let ptr := mload(0x40)
+            mstore(ptr, 0x363d3d373d3d3d363d7300000000000000000000000000000000000000000000)
+            mstore(add(ptr, 0xa), implementationBytes)
+            mstore(add(ptr, 0x1e), 0x5af43d82803e903d91602b57fd5bf30000000000000000000000000000000000)
+
+            let other := add(ptr, 0x40)
+            extcodecopy(query, other, 0, 0x2d)
+            result := and(
+                eq(mload(ptr), mload(other)),
+                eq(mload(add(ptr, 0xd)), mload(add(other, 0xd)))
+            )
+        }
+    }
 }

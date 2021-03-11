@@ -23,6 +23,10 @@ contract ClonesMock {
         return implementation.predictDeterministicAddress(salt);
     }
 
+    function isClone(address implementation, address query) public view returns (bool resut) {
+        return implementation.isClone(query);
+    }
+
     function _initAndEmit(address instance, bytes memory initdata) private {
         if (initdata.length > 0) {
             instance.functionCallWithValue(initdata, msg.value);
