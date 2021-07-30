@@ -118,6 +118,11 @@ contract('MinimalForwarder', function (accounts) {
         afterEach(async function () {
           expect(await this.forwarder.getNonce(this.req.from))
             .to.be.bignumber.equal(web3.utils.toBN(this.req.nonce + 1));
+
+          await expectRevert(
+            this.forwarder.execute(this.req, this.sign),
+            'MinimalForwarder: invalid nonce',
+          );
         });
       });
 

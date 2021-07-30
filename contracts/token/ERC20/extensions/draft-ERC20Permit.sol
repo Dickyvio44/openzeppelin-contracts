@@ -6,7 +6,7 @@ import "./draft-IERC20Permit.sol";
 import "../ERC20.sol";
 import "../../../utils/cryptography/draft-EIP712.sol";
 import "../../../utils/cryptography/ECDSA.sol";
-import "../../../utils/Counters.sol";
+import "../../../utils/ReplayProtection.sol";
 
 /**
  * @dev Implementation of the ERC20 Permit extension allowing approvals to be made via signatures, as defined in
@@ -19,9 +19,9 @@ import "../../../utils/Counters.sol";
  * _Available since v3.4._
  */
 abstract contract ERC20Permit is ERC20, IERC20Permit, EIP712 {
-    using Counters for Counters.Counter;
+    using ReplayProtection for ReplayProtection.Nonces;
 
-    mapping(address => Counters.Counter) private _nonces;
+    ReplayProtection.Nonces private _nonces;
 
     // solhint-disable-next-line var-name-mixedcase
     bytes32 private immutable _PERMIT_TYPEHASH =
@@ -62,7 +62,7 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, EIP712 {
      * @dev See {IERC20Permit-nonces}.
      */
     function nonces(address owner) public view virtual override returns (uint256) {
-        return _nonces[owner].current();
+        return _nonces.getNonce(owner);
     }
 
     /**
@@ -79,8 +79,6 @@ abstract contract ERC20Permit is ERC20, IERC20Permit, EIP712 {
      * _Available since v4.1._
      */
     function _useNonce(address owner) internal virtual returns (uint256 current) {
-        Counters.Counter storage nonce = _nonces[owner];
-        current = nonce.current();
-        nonce.increment();
+        return _nonces.useNonce(owner);
     }
 }
