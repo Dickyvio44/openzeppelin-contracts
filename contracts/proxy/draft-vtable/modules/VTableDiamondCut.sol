@@ -11,14 +11,14 @@ import "./IDiamondCut.sol";
 contract VTableDiamondCut is Context, IDiamondCut {
     using VTable for VTable.VTableStore;
 
-    function diamondCut(FacetCut[] calldata $diamondCut, address $init, bytes memory $calldata) public override {
+    function diamondCut(FacetCut[] calldata _diamondCut, address _init, bytes memory _calldata) public override {
         VTable.VTableStore storage vtable = VTable.instance();
         require(VTable.instance().getOwner() == _msgSender(), "VTableOwnership: caller is not the owner");
 
-        emit DiamondCut($diamondCut, $init, $calldata);
+        emit DiamondCut(_diamondCut, _init, _calldata);
 
-        for (uint256 i = 0; i < $diamondCut.length; ++i) {
-            FacetCut memory facetcut = $diamondCut[i];
+        for (uint256 i = 0; i < _diamondCut.length; ++i) {
+            FacetCut memory facetcut = _diamondCut[i];
             for (uint256 j = 0; j < facetcut.functionSelectors.length; ++j) {
                 address currentFacet = vtable.getFunction(facetcut.functionSelectors[j]);
                 require(facetcut.action != FacetCutAction.Add     || currentFacet == address(0),            "Facet already exists");
@@ -28,6 +28,6 @@ contract VTableDiamondCut is Context, IDiamondCut {
             }
         }
 
-        Address.functionCall($init, $calldata);
+        Address.functionCall(_init, _calldata);
     }
 }

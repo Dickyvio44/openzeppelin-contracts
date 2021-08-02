@@ -15,9 +15,9 @@ contract VTableDiamondLoupe is Context, IDiamondLoupe {
         revert("This implementation doesnt keep an index, use an offchain index instead");
     }
 
-    function facetFunctionSelectors(address $facet) public view override returns (bytes4[] memory) {
+    function facetFunctionSelectors(address _facet) public view override returns (bytes4[] memory) {
         this;
-        $facet;
+        _facet;
         revert("This implementation doesnt keep an index, use an offchain index instead");
     }
 
@@ -26,8 +26,8 @@ contract VTableDiamondLoupe is Context, IDiamondLoupe {
         revert("This implementation doesnt keep an index, use an offchain index instead");
     }
 
-    function facetAddress(bytes4 $functionSelector) public view override returns (address) {
+    function facetAddress(bytes4 _functionSelector) public view override returns (address) {
         VTable.VTableStore storage vtable = VTable.instance();
-        return vtable.getFunction($functionSelector);
+        return vtable.getFunction(_functionSelector);
     }
 }
