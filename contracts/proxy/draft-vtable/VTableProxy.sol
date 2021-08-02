@@ -14,7 +14,7 @@ import "../../utils/Context.sol";
 contract VTableProxy is Proxy, Context {
     using VTable for VTable.VTableStore;
 
-    bytes4 private constant _FALLBACK_SIGN = 0xffffffff;
+    bytes4 private constant _FALLBACK_SIG = 0xffffffff;
 
     constructor(address updatemodule) {
         VTable.VTableStore storage vtable = VTable.instance();
@@ -29,7 +29,7 @@ contract VTableProxy is Proxy, Context {
         module = vtable.getFunction(msg.sig);
         if (module != address(0)) return module;
 
-        module = vtable.getFunction(_FALLBACK_SIGN);
+        module = vtable.getFunction(_FALLBACK_SIG);
         if (module != address(0)) return module;
 
         revert("VTableProxy: No implementation found");
