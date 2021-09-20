@@ -18,6 +18,9 @@ import "../ERC1967/ERC1967Upgrade.sol";
  * _Available since v4.1._
  */
 abstract contract UUPSUpgradeable is ERC1967Upgrade {
+    // This is the keccak-256 hash of "eip1967.proxy.rollback" subtracted by 1
+    bytes32 private constant _ROLLBACK_SLOT = 0x4910fdfa16fed3260ed0e7147f7cc6da11a60208b5b9406d12a635614ffd9143;
+
     /// @custom:oz-upgrades-unsafe-allow state-variable-immutable state-variable-assignment
     address private immutable __self = address(this);
 
@@ -57,6 +60,63 @@ abstract contract UUPSUpgradeable is ERC1967Upgrade {
     function upgradeToAndCall(address newImplementation, bytes memory data) external payable virtual onlyProxy {
         _authorizeUpgrade(newImplementation);
         _upgradeToAndCallSecure(newImplementation, data, true);
+    }
+
+    /**
+     * @dev Perform implementation upgrade with security checks for UUPS proxies, and additional setup call.
+     *
+     * Emits an {Upgraded} event.
+     */
+    function _upgradeToAndCallSecure(
+        address newImplementation,
+        bytes memory data,
+        bool forceCall
+    ) private {
+        _upgradeToAndCall(newImplementation, data, forceCall);
+
+        // Perform rollback test if not already in progress
+        StorageSlot.BooleanSlot storage rollbackTesting = StorageSlot.getBooleanSlot(_ROLLBACK_SLOT);
+        if (!rollbackTesting.value) {
+            rollbackTesting.value = true;
+
+            /// @custom:oz-upgrades-unsafe-allow delegatecall
+            (bool success, bytes memory returndata) = __self.delegatecall(abi.encodeWithSignature("__checkRollback()"));
+
+            // This call is expected to revert with error Error(string(abi.encodePacked(_getImplementation())));
+            //
+            // | ↓ returndata      | ←←←←←←←←←←←←←←←←←←←←←←←←←←←←← length = 100 →→→→→→→→→→→→→→→→→→→→→→→→→→→→→ |
+            // | 0              31 | 32          35 | 36         67 | 68             99 | 100             131 |
+            // | returndata.length | error.selector | string.length | abi.encode.length | _getImplemntation() |
+
+            // Check call reverts and length is correct
+            require(!success && returndata.length == 100, "ERC1967Upgrade: upgrade breaks further upgrades");
+
+            // Extract values
+            bytes4 sig;
+            address impl;
+            assembly {
+                sig := mload(add(returndata, 32))
+                impl := mload(add(returndata, 100))
+            }
+
+            // Check revert data matchs the expect implementation. 0x08c379a0 is the selector of Error(string)
+            require(sig == 0x08c379a0 && impl == __self, "ERC1967Upgrade: upgrade breaks further upgrades");
+
+            rollbackTesting.value = false;
+        }
+    }
+
+    /**
+     * @dev External security check used by {_upgradeToAndCallSecure}.
+     *
+     * Note: Will always revert. Revert data is used to identify result.
+     */
+    // solhint-disable-next-line private-vars-leading-underscore
+    function __checkRollback() external {
+        /// @custom:oz-upgrades-unsafe-allow delegatecall
+        (bool success, ) = address(this).delegatecall(abi.encodeWithSignature("upgradeTo(address)", __self));
+        // if failure revert with empty data, otherwize pass rollback result through the revert returndata
+        revert(success ? string(abi.encode(_getImplementation())) : "");
     }
 
     /**
