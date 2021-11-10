@@ -121,11 +121,13 @@ contract('Governor', function (accounts) {
             this.settings.voters.find(({ address }) => address === voter),
           );
         });
+
         expectEvent(
           this.receipts.execute,
           'ProposalExecuted',
           { proposalId: this.id },
         );
+
         await expectEvent.inTransaction(
           this.receipts.execute.transactionHash,
           this.receiver,
