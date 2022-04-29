@@ -26,6 +26,10 @@ import "./IVotes.sol";
  * {ERC721-balanceOf}), and can use {_transferVotingUnits} to track a change in the distribution of those units (in the
  * previous example, it would be included in {ERC721-_beforeTokenTransfer}).
  *
+ * The voting weight are stored in a uint224. This means restricts the underlying asset to having a total supply not
+ * greater then 2^224^ - 1. Using this module with assets that have a total supply greater then 2^224^ - 1 will cause
+ * a reverting overflow that could lock the minting mechanism, and possibly the entire contract.
+ *
  * _Available since v4.5._
  */
 abstract contract Votes is IVotes, Context, EIP712 {
@@ -71,7 +75,6 @@ abstract contract Votes is IVotes, Context, EIP712 {
      * - `blockNumber` must have been already mined
      */
     function getPastTotalSupply(uint256 blockNumber) public view virtual override returns (uint256) {
-        require(blockNumber < block.number, "Votes: block not yet mined");
         return _totalCheckpoints.getAtBlock(blockNumber);
     }
 

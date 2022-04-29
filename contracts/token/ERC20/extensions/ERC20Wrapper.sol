@@ -36,18 +36,24 @@ abstract contract ERC20Wrapper is ERC20 {
     /**
      * @dev Allow a user to deposit underlying tokens and mint the corresponding number of wrapped tokens.
      */
-    function depositFor(address account, uint256 amount) public virtual returns (bool) {
-        SafeERC20.safeTransferFrom(underlying, _msgSender(), address(this), amount);
-        _mint(account, amount);
+    function depositFor(address to, uint256 amount) public virtual returns (bool) {
+        address from = _msgSender();
+        require(from != address(this), "ERC20Wrapper: cannot deposit into the vault");
+
+        SafeERC20.safeTransferFrom(underlying, from, address(this), amount);
+        _mint(to, amount);
         return true;
     }
 
     /**
      * @dev Allow a user to burn a number of wrapped tokens and withdraw the corresponding number of underlying tokens.
      */
-    function withdrawTo(address account, uint256 amount) public virtual returns (bool) {
-        _burn(_msgSender(), amount);
-        SafeERC20.safeTransfer(underlying, account, amount);
+    function withdrawTo(address to, uint256 amount) public virtual returns (bool) {
+        address from = _msgSender();
+        require(to != address(this), "ERC20Wrapper: cannot withdraw to the vault");
+
+        _burn(from, amount);
+        SafeERC20.safeTransfer(underlying, to, amount);
         return true;
     }
 
