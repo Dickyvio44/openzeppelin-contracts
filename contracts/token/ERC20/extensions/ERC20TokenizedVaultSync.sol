@@ -7,7 +7,7 @@ import "./ERC20TokenizedVault.sol";
 /**
  * @dev
  */
-abstract contract ERC20TokenizedVault2 is ERC20TokenizedVault {
+abstract contract ERC20TokenizedVaultSync is ERC20TokenizedVault {
     uint256 private _totalAssets;
 
     constructor() {
@@ -28,6 +28,8 @@ abstract contract ERC20TokenizedVault2 is ERC20TokenizedVault {
         uint256 assets,
         uint256 shares
     ) internal virtual override {
+        // For _deposit, the updates are done after the transfer, because an
+        // ERC777 can cause a reentrance before balance is updated.
         super._deposit(caller, receiver, assets, shares);
         _totalAssets += assets;
     }
@@ -39,6 +41,8 @@ abstract contract ERC20TokenizedVault2 is ERC20TokenizedVault {
         uint256 assets,
         uint256 shares
     ) internal virtual override {
+        // For _withdraw, the updates are done before the transfer, because an
+        // ERC777 can cause a reentrance after balance is updated.
         _totalAssets -= assets;
         super._withdraw(caller, receiver, owner, assets, shares);
     }
