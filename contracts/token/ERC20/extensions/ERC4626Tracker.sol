@@ -2,12 +2,12 @@
 
 pragma solidity ^0.8.0;
 
-import "./ERC20TokenizedVault.sol";
+import "./ERC4626.sol";
 
 /**
  * @dev
  */
-abstract contract ERC20TokenizedVaultSync is ERC20TokenizedVault {
+abstract contract ERC4626Tracker is ERC4626 {
     uint256 private _totalAssets;
 
     constructor() {
