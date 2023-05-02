@@ -10,7 +10,7 @@ const CallReceiverMock = artifacts.require('CallReceiverMock');
 const Implementation2 = artifacts.require('Implementation2');
 const ERC721 = artifacts.require('$ERC721');
 const ERC1155 = artifacts.require('$ERC1155');
-const TimelockReentrant = artifacts.require('$TimelockReentrant');
+const ReentrantHelper = artifacts.require('$ReentrantHelper');
 
 const MINDELAY = time.duration.days(1);
 
@@ -349,11 +349,11 @@ contract('TimelockController', function (accounts) {
 
             it('prevents reentrancy execution', async function () {
               // Create operation
-              const reentrant = await TimelockReentrant.new();
+              const reentrant = await ReentrantHelper.new();
               const reentrantOperation = genOperation(
                 reentrant.address,
                 0,
-                reentrant.contract.methods.reenter().encodeABI(),
+                '0xdead', // fallback
                 ZERO_BYTES32,
                 salt,
               );
@@ -377,16 +377,18 @@ contract('TimelockController', function (accounts) {
               await this.mock.grantRole(EXECUTOR_ROLE, reentrant.address, { from: admin });
 
               // Prepare reenter
-              const data = this.mock.contract.methods
-                .execute(
-                  reentrantOperation.target,
-                  reentrantOperation.value,
-                  reentrantOperation.data,
-                  reentrantOperation.predecessor,
-                  reentrantOperation.salt,
-                )
-                .encodeABI();
-              await reentrant.enableRentrancy(this.mock.address, data);
+              await reentrant.$_schedule(
+                this.mock.address,
+                this.mock.contract.methods
+                  .execute(
+                    reentrantOperation.target,
+                    reentrantOperation.value,
+                    reentrantOperation.data,
+                    reentrantOperation.predecessor,
+                    reentrantOperation.salt,
+                  )
+                  .encodeABI(),
+              );
 
               // Expect to fail
               await expectRevert(
@@ -402,7 +404,7 @@ contract('TimelockController', function (accounts) {
               );
 
               // Disable reentrancy
-              await reentrant.disableReentrancy();
+              await reentrant.$_reset();
               const nonReentrantOperation = reentrantOperation; // Not anymore
 
               // Try again successfully
@@ -712,11 +714,11 @@ contract('TimelockController', function (accounts) {
 
             it('prevents reentrancy execution', async function () {
               // Create operation
-              const reentrant = await TimelockReentrant.new();
+              const reentrant = await ReentrantHelper.new();
               const reentrantBatchOperation = genOperationBatch(
                 [reentrant.address],
                 [0],
-                [reentrant.contract.methods.reenter().encodeABI()],
+                ['0xbeef'], // fallback
                 ZERO_BYTES32,
                 salt,
               );
@@ -740,16 +742,18 @@ contract('TimelockController', function (accounts) {
               await this.mock.grantRole(EXECUTOR_ROLE, reentrant.address, { from: admin });
 
               // Prepare reenter
-              const data = this.mock.contract.methods
-                .executeBatch(
-                  reentrantBatchOperation.targets,
-                  reentrantBatchOperation.values,
-                  reentrantBatchOperation.payloads,
-                  reentrantBatchOperation.predecessor,
-                  reentrantBatchOperation.salt,
-                )
-                .encodeABI();
-              await reentrant.enableRentrancy(this.mock.address, data);
+              await reentrant.$_schedule(
+                this.mock.address,
+                this.mock.contract.methods
+                  .executeBatch(
+                    reentrantBatchOperation.targets,
+                    reentrantBatchOperation.values,
+                    reentrantBatchOperation.payloads,
+                    reentrantBatchOperation.predecessor,
+                    reentrantBatchOperation.salt,
+                  )
+                  .encodeABI(),
+              );
 
               // Expect to fail
               await expectRevert(
@@ -765,7 +769,7 @@ contract('TimelockController', function (accounts) {
               );
 
               // Disable reentrancy
-              await reentrant.disableReentrancy();
+              await reentrant.$_reset();
               const nonReentrantBatchOperation = reentrantBatchOperation; // Not anymore
 
               // Try again successfully
