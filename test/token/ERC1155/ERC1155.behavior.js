@@ -139,7 +139,7 @@ function shouldBehaveLikeERC1155([minter, firstTokenHolder, secondTokenHolder, m
       });
 
       it('sets approval status which can be queried via isApprovedForAll', async function () {
-        expect(await this.token.isApprovedForAll(multiTokenHolder, proxy)).to.be.equal(true);
+        expect(await this.token.isApprovedForAll(multiTokenHolder, proxy)).to.be.true;
       });
 
       it('emits an ApprovalForAll log', function () {
@@ -148,7 +148,7 @@ function shouldBehaveLikeERC1155([minter, firstTokenHolder, secondTokenHolder, m
 
       it('can unset approval for an operator', async function () {
         await this.token.setApprovalForAll(proxy, false, { from: multiTokenHolder });
-        expect(await this.token.isApprovedForAll(multiTokenHolder, proxy)).to.be.equal(false);
+        expect(await this.token.isApprovedForAll(multiTokenHolder, proxy)).to.be.false;
       });
 
       it('reverts if attempting to approve zero address as an operator', async function () {

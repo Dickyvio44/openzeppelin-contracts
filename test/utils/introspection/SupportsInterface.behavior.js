@@ -119,7 +119,7 @@ function shouldSupportInterfaces(interfaces = []) {
       });
 
       it('returns false', async function () {
-        expect(await this.contractUnderTest.supportsInterface(INVALID_ID)).to.be.equal(false, `supports ${INVALID_ID}`);
+        expect(await this.contractUnderTest.supportsInterface(INVALID_ID)).to.equal(false, `supports ${INVALID_ID}`);
       });
     });
 

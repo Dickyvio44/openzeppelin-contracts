@@ -17,6 +17,6 @@ contract('ERC721Holder', function (accounts) {
     const receiver = await ERC721Holder.new();
     await token.safeTransferFrom(owner, receiver.address, tokenId, { from: owner });
 
-    expect(await token.ownerOf(tokenId)).to.be.equal(receiver.address);
+    expect(await token.ownerOf(tokenId)).to.equal(receiver.address);
   });
 });

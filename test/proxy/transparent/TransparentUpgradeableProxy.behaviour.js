@@ -53,14 +53,14 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
   describe('implementation', function () {
     it('returns the current implementation address', async function () {
       const implementationAddress = await getAddressInSlot(this.proxy, ImplementationSlot);
-      expect(implementationAddress).to.be.equal(this.implementationV0);
+      expect(implementationAddress).to.equal(this.implementationV0);
     });
 
     it('delegates to the implementation', async function () {
       const dummy = new DummyImplementation(this.proxy.address);
       const value = await dummy.get();
 
-      expect(value).to.equal(true);
+      expect(value).to.be.true;
     });
   });
 
@@ -73,16 +73,16 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
     });
 
     it('sets the proxy admin in storage with the correct initial owner', async function () {
-      expect(await getAddressInSlot(this.proxy, AdminSlot)).to.be.equal(this.proxyAdminAddress);
+      expect(await getAddressInSlot(this.proxy, AdminSlot)).to.equal(this.proxyAdminAddress);
       const proxyAdmin = await Ownable.at(this.proxyAdminAddress);
-      expect(await proxyAdmin.owner()).to.be.equal(initialOwner);
+      expect(await proxyAdmin.owner()).to.equal(initialOwner);
     });
 
     it('can overwrite the admin by the implementation', async function () {
       const dummy = new DummyImplementation(this.proxy.address);
       await dummy.unsafeOverrideAdmin(anotherAccount);
       const ERC1967AdminSlotValue = await getAddressInSlot(this.proxy, AdminSlot);
-      expect(ERC1967AdminSlotValue).to.be.equal(anotherAccount);
+      expect(ERC1967AdminSlotValue).to.equal(anotherAccount);
 
       // Still allows previous admin to execute admin operations
       expect(ERC1967AdminSlotValue).to.not.equal(this.proxyAdminAddress);
@@ -117,7 +117,7 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
 
           it('upgrades to the requested implementation', async function () {
             const implementationAddress = await getAddressInSlot(this.proxy, ImplementationSlot);
-            expect(implementationAddress).to.be.equal(this.behavior.address);
+            expect(implementationAddress).to.equal(this.behavior.address);
           });
 
           it('emits an event', function () {
@@ -182,7 +182,7 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
 
           it('upgrades to the requested version and emits an event', async function () {
             const implementation = await getAddressInSlot(this.proxy, ImplementationSlot);
-            expect(implementation).to.be.equal(this.behaviorV1.address);
+            expect(implementation).to.equal(this.behaviorV1.address);
             expectEvent(this.receipt, 'Upgraded', { implementation: this.behaviorV1.address });
           });
 
@@ -210,7 +210,7 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
 
             it('upgrades to the requested version and emits an event', async function () {
               const implementation = await getAddressInSlot(this.proxy, ImplementationSlot);
-              expect(implementation).to.be.equal(this.behaviorV2.address);
+              expect(implementation).to.equal(this.behaviorV2.address);
               expectEvent(this.receipt, 'Upgraded', { implementation: this.behaviorV2.address });
             });
 
@@ -241,7 +241,7 @@ module.exports = function shouldBehaveLikeTransparentUpgradeableProxy(createProx
 
               it('upgrades to the requested version and emits an event', async function () {
                 const implementation = await getAddressInSlot(this.proxy, ImplementationSlot);
-                expect(implementation).to.be.equal(this.behaviorV3.address);
+                expect(implementation).to.equal(this.behaviorV3.address);
                 expectEvent(this.receipt, 'Upgraded', { implementation: this.behaviorV3.address });
               });
 

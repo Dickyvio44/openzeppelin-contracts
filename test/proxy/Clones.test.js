@@ -52,7 +52,7 @@ contract('Clones', function (accounts) {
         '5af43d82803e903d91602b57fd5bf3',
       ].join('');
 
-      expect(ethers.getCreate2Address(factory.address, salt, ethers.keccak256(creationCode))).to.be.equal(predicted);
+      expect(ethers.getCreate2Address(factory.address, salt, ethers.keccak256(creationCode))).to.equal(predicted);
 
       expectEvent(await factory.$cloneDeterministic(implementation, salt), 'return$cloneDeterministic', {
         instance: predicted,

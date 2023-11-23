@@ -122,32 +122,32 @@ contract('Strings', function () {
 
   describe('equal', function () {
     it('compares two empty strings', async function () {
-      expect(await this.strings.methods['$equal(string,string)']('', '')).to.equal(true);
+      expect(await this.strings.methods['$equal(string,string)']('', '')).to.be.true;
     });
 
     it('compares two equal strings', async function () {
-      expect(await this.strings.methods['$equal(string,string)']('a', 'a')).to.equal(true);
+      expect(await this.strings.methods['$equal(string,string)']('a', 'a')).to.be.true;
     });
 
     it('compares two different strings', async function () {
-      expect(await this.strings.methods['$equal(string,string)']('a', 'b')).to.equal(false);
+      expect(await this.strings.methods['$equal(string,string)']('a', 'b')).to.be.false;
     });
 
     it('compares two different strings of different lengths', async function () {
-      expect(await this.strings.methods['$equal(string,string)']('a', 'aa')).to.equal(false);
-      expect(await this.strings.methods['$equal(string,string)']('aa', 'a')).to.equal(false);
+      expect(await this.strings.methods['$equal(string,string)']('a', 'aa')).to.be.false;
+      expect(await this.strings.methods['$equal(string,string)']('aa', 'a')).to.be.false;
     });
 
     it('compares two different large strings', async function () {
       const str1 = 'a'.repeat(201);
       const str2 = 'a'.repeat(200) + 'b';
-      expect(await this.strings.methods['$equal(string,string)'](str1, str2)).to.equal(false);
+      expect(await this.strings.methods['$equal(string,string)'](str1, str2)).to.be.false;
     });
 
     it('compares two equal large strings', async function () {
       const str1 = 'a'.repeat(201);
       const str2 = 'a'.repeat(201);
-      expect(await this.strings.methods['$equal(string,string)'](str1, str2)).to.equal(true);
+      expect(await this.strings.methods['$equal(string,string)'](str1, str2)).to.be.true;
     });
   });
 });

@@ -228,8 +228,8 @@ contract('ERC1155', function (accounts) {
     });
 
     it('sets the initial URI for all token types', async function () {
-      expect(await this.token.uri(firstTokenID)).to.be.equal(initialURI);
-      expect(await this.token.uri(secondTokenID)).to.be.equal(initialURI);
+      expect(await this.token.uri(firstTokenID)).to.equal(initialURI);
+      expect(await this.token.uri(secondTokenID)).to.equal(initialURI);
     });
 
     describe('_setURI', function () {
@@ -244,8 +244,8 @@ contract('ERC1155', function (accounts) {
       it('sets the new URI for all token types', async function () {
         await this.token.$_setURI(newURI);
 
-        expect(await this.token.uri(firstTokenID)).to.be.equal(newURI);
-        expect(await this.token.uri(secondTokenID)).to.be.equal(newURI);
+        expect(await this.token.uri(firstTokenID)).to.equal(newURI);
+        expect(await this.token.uri(secondTokenID)).to.equal(newURI);
       });
     });
   });

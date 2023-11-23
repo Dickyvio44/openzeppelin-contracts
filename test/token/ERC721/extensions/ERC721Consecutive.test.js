@@ -63,7 +63,7 @@ contract('ERC721Consecutive', function (accounts) {
 
           for (const tokenId in owners) {
             if (owners[tokenId] != constants.ZERO_ADDRESS) {
-              expect(await this.token.ownerOf(tokenId)).to.be.equal(owners[tokenId]);
+              expect(await this.token.ownerOf(tokenId)).to.equal(owners[tokenId]);
             }
           }
         });
@@ -127,7 +127,7 @@ contract('ERC721Consecutive', function (accounts) {
         it('core takes over ownership on transfer', async function () {
           await this.token.transferFrom(user1, receiver, tokenId, { from: user1 });
 
-          expect(await this.token.ownerOf(tokenId)).to.be.equal(receiver);
+          expect(await this.token.ownerOf(tokenId)).to.equal(receiver);
         });
 
         it('tokens can be burned and re-minted #1', async function () {
@@ -145,7 +145,7 @@ contract('ERC721Consecutive', function (accounts) {
             tokenId,
           });
 
-          expect(await this.token.ownerOf(tokenId)).to.be.equal(user2);
+          expect(await this.token.ownerOf(tokenId)).to.equal(user2);
         });
 
         it('tokens can be burned and re-minted #2', async function () {

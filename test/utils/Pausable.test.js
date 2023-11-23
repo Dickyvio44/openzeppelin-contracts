@@ -14,7 +14,7 @@ contract('Pausable', function (accounts) {
 
   context('when unpaused', function () {
     beforeEach(async function () {
-      expect(await this.pausable.paused()).to.equal(false);
+      expect(await this.pausable.paused()).to.be.false;
     });
 
     it('can perform normal process in non-pause', async function () {
@@ -26,7 +26,7 @@ contract('Pausable', function (accounts) {
 
     it('cannot take drastic measure in non-pause', async function () {
       await expectRevertCustomError(this.pausable.drasticMeasure(), 'ExpectedPause', []);
-      expect(await this.pausable.drasticMeasureTaken()).to.equal(false);
+      expect(await this.pausable.drasticMeasureTaken()).to.be.false;
     });
 
     context('when paused', function () {
@@ -44,7 +44,7 @@ contract('Pausable', function (accounts) {
 
       it('can take a drastic measure in a pause', async function () {
         await this.pausable.drasticMeasure();
-        expect(await this.pausable.drasticMeasureTaken()).to.equal(true);
+        expect(await this.pausable.drasticMeasureTaken()).to.be.true;
       });
 
       it('reverts when re-pausing', async function () {
@@ -54,7 +54,7 @@ contract('Pausable', function (accounts) {
       describe('unpausing', function () {
         it('is unpausable by the pauser', async function () {
           await this.pausable.unpause();
-          expect(await this.pausable.paused()).to.equal(false);
+          expect(await this.pausable.paused()).to.be.false;
         });
 
         context('when unpaused', function () {

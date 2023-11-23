@@ -93,7 +93,7 @@ contract('ERC1155Pausable', function (accounts) {
     describe('setApprovalForAll', function () {
       it('approves an operator', async function () {
         await this.token.setApprovalForAll(other, true, { from: holder });
-        expect(await this.token.isApprovedForAll(holder, other)).to.equal(true);
+        expect(await this.token.isApprovedForAll(holder, other)).to.be.true;
       });
     });
 
@@ -106,7 +106,7 @@ contract('ERC1155Pausable', function (accounts) {
 
     describe('isApprovedForAll', function () {
       it('returns the approval of the operator', async function () {
-        expect(await this.token.isApprovedForAll(holder, operator)).to.equal(true);
+        expect(await this.token.isApprovedForAll(holder, operator)).to.be.true;
       });
     });
   });

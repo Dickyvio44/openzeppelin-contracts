@@ -68,7 +68,7 @@ contract('ERC721Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.account1Votes = '0';
           this.account2Votes = '0';
@@ -86,7 +86,7 @@ contract('ERC721Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.account1Votes = '0';
           this.account2Votes = '1';
@@ -106,7 +106,7 @@ contract('ERC721Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.account1Votes = '0';
           this.account2Votes = '1';

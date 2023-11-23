@@ -57,7 +57,7 @@ contract('ProxyAdmin', function (accounts) {
         });
 
         const implementationAddress = await getAddressInSlot(this.proxy, ImplementationSlot);
-        expect(implementationAddress).to.be.equal(this.implementationV2.address);
+        expect(implementationAddress).to.equal(this.implementationV2.address);
       });
     });
   });
@@ -95,7 +95,7 @@ contract('ProxyAdmin', function (accounts) {
             from: proxyAdminOwner,
           });
           const implementationAddress = await getAddressInSlot(this.proxy, ImplementationSlot);
-          expect(implementationAddress).to.be.equal(this.implementationV2.address);
+          expect(implementationAddress).to.equal(this.implementationV2.address);
         });
       });
     });

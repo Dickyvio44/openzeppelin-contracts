@@ -282,10 +282,10 @@ contract('ERC4626', function (accounts) {
       });
 
       it('metadata', async function () {
-        expect(await this.vault.name()).to.be.equal(name + ' Vault');
-        expect(await this.vault.symbol()).to.be.equal(symbol + 'V');
+        expect(await this.vault.name()).to.equal(name + ' Vault');
+        expect(await this.vault.symbol()).to.equal(symbol + 'V');
         expect(await this.vault.decimals()).to.be.bignumber.equal(decimals.add(offset));
-        expect(await this.vault.asset()).to.be.equal(this.token.address);
+        expect(await this.vault.asset()).to.equal(this.token.address);
       });
 
       describe('empty vault: no assets & no shares', function () {

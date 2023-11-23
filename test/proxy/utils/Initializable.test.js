@@ -20,11 +20,11 @@ contract('Initializable', function () {
 
     describe('before initialize', function () {
       it('initializer has not run', async function () {
-        expect(await this.contract.initializerRan()).to.equal(false);
+        expect(await this.contract.initializerRan()).to.be.false;
       });
 
       it('_initializing returns false before initialization', async function () {
-        expect(await this.contract.isInitializing()).to.equal(false);
+        expect(await this.contract.isInitializing()).to.be.false;
       });
     });
 
@@ -34,11 +34,11 @@ contract('Initializable', function () {
       });
 
       it('initializer has run', async function () {
-        expect(await this.contract.initializerRan()).to.equal(true);
+        expect(await this.contract.initializerRan()).to.be.true;
       });
 
       it('_initializing returns false after initialization', async function () {
-        expect(await this.contract.isInitializing()).to.equal(false);
+        expect(await this.contract.isInitializing()).to.be.false;
       });
 
       it('initializer does not run again', async function () {
@@ -53,7 +53,7 @@ contract('Initializable', function () {
 
       it('onlyInitializing modifier succeeds', async function () {
         await this.contract.onlyInitializingNested();
-        expect(await this.contract.onlyInitializingRan()).to.equal(true);
+        expect(await this.contract.onlyInitializingRan()).to.be.true;
       });
     });
 
@@ -64,15 +64,15 @@ contract('Initializable', function () {
 
   it('nested initializer can run during construction', async function () {
     const contract2 = await ConstructorInitializableMock.new();
-    expect(await contract2.initializerRan()).to.equal(true);
-    expect(await contract2.onlyInitializingRan()).to.equal(true);
+    expect(await contract2.initializerRan()).to.be.true;
+    expect(await contract2.onlyInitializingRan()).to.be.true;
   });
 
   it('multiple constructor levels can be initializers', async function () {
     const contract2 = await ChildConstructorInitializableMock.new();
-    expect(await contract2.initializerRan()).to.equal(true);
-    expect(await contract2.childInitializerRan()).to.equal(true);
-    expect(await contract2.onlyInitializingRan()).to.equal(true);
+    expect(await contract2.initializerRan()).to.be.true;
+    expect(await contract2.childInitializerRan()).to.be.true;
+    expect(await contract2.onlyInitializingRan()).to.be.true;
   });
 
   describe('reinitialization', function () {
@@ -148,7 +148,7 @@ contract('Initializable', function () {
       const contract = await ReinitializerMock.new();
 
       const { receipt } = await contract.initialize();
-      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.be.equal(1);
+      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.equal(1);
       expectEvent(receipt, 'Initialized', { version: '1' });
     });
 
@@ -156,7 +156,7 @@ contract('Initializable', function () {
       const contract = await ReinitializerMock.new();
 
       const { receipt } = await contract.reinitialize(128);
-      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.be.equal(1);
+      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.equal(1);
       expectEvent(receipt, 'Initialized', { version: '128' });
     });
 
@@ -164,7 +164,7 @@ contract('Initializable', function () {
       const contract = await ReinitializerMock.new();
 
       const { receipt } = await contract.chainReinitialize(2, 3);
-      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.be.equal(2);
+      expect(receipt.logs.filter(({ event }) => event === 'Initialized').length).to.equal(2);
       expectEvent(receipt, 'Initialized', { version: '2' });
       expectEvent(receipt, 'Initialized', { version: '3' });
     });
@@ -185,7 +185,7 @@ contract('Initializable', function () {
     });
 
     it('initializes human', async function () {
-      expect(await this.contract.isHuman()).to.be.equal(true);
+      expect(await this.contract.isHuman()).to.be.true;
     });
 
     it('initializes mother', async function () {

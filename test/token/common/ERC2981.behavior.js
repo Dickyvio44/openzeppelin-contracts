@@ -20,7 +20,7 @@ function shouldBehaveLikeERC2981() {
 
       const initInfo = await this.token.royaltyInfo(this.tokenId1, this.salePrice);
 
-      expect(initInfo[0]).to.be.equal(this.account1);
+      expect(initInfo[0]).to.equal(this.account1);
       expect(initInfo[1]).to.be.bignumber.equal(royalty);
     });
 
@@ -32,7 +32,7 @@ function shouldBehaveLikeERC2981() {
       const royalty = new BN((this.salePrice * newPercentage) / 10000);
       const newInfo = await this.token.royaltyInfo(this.tokenId1, this.salePrice);
 
-      expect(newInfo[0]).to.be.equal(this.account1);
+      expect(newInfo[0]).to.equal(this.account1);
       expect(newInfo[1]).to.be.bignumber.equal(royalty);
     });
 
@@ -56,7 +56,7 @@ function shouldBehaveLikeERC2981() {
       expect(token1Info[0]).to.be.bignumber.equal(token2Info[0]);
       expect(token1Info[1]).to.be.bignumber.equal(token2Info[1]);
       // Test information was deleted
-      expect(token1Info[0]).to.be.equal(ZERO_ADDRESS);
+      expect(token1Info[0]).to.equal(ZERO_ADDRESS);
       expect(token1Info[1]).to.be.bignumber.equal(newValue);
     });
 
@@ -88,7 +88,7 @@ function shouldBehaveLikeERC2981() {
       // Initial royalty check
       const initInfo = await this.token.royaltyInfo(this.tokenId1, this.salePrice);
 
-      expect(initInfo[0]).to.be.equal(this.account1);
+      expect(initInfo[0]).to.equal(this.account1);
       expect(initInfo[1]).to.be.bignumber.equal(royalty);
 
       // Updated royalty check
@@ -96,7 +96,7 @@ function shouldBehaveLikeERC2981() {
       royalty = new BN((this.salePrice * newPercentage) / 10000);
       const newInfo = await this.token.royaltyInfo(this.tokenId1, this.salePrice);
 
-      expect(newInfo[0]).to.be.equal(this.account1);
+      expect(newInfo[0]).to.equal(this.account1);
       expect(newInfo[1]).to.be.bignumber.equal(royalty);
     });
 
@@ -136,12 +136,12 @@ function shouldBehaveLikeERC2981() {
 
       // Tokens must have own information
       expect(tokenInfo[1]).to.be.bignumber.equal(royalty);
-      expect(tokenInfo[0]).to.be.equal(this.account2);
+      expect(tokenInfo[0]).to.equal(this.account2);
 
       await this.token.$_setTokenRoyalty(this.tokenId2, this.account1, new BN('0'));
       const result = await this.token.royaltyInfo(this.tokenId2, this.salePrice);
       // Token must not share default information
-      expect(result[0]).to.be.equal(this.account1);
+      expect(result[0]).to.equal(this.account1);
       expect(result[1]).to.be.bignumber.equal(new BN('0'));
     });
 
@@ -158,7 +158,7 @@ function shouldBehaveLikeERC2981() {
       expect(token1Info[0]).to.not.be.equal(token2Info[0]);
 
       // Updated token must have new values
-      expect(token2Info[0]).to.be.equal(this.account2);
+      expect(token2Info[0]).to.equal(this.account2);
       expect(token2Info[1]).to.be.bignumber.equal(royalty);
     });
   });

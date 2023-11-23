@@ -14,7 +14,7 @@ function expectStruct(value, expected) {
     if (BN.isBN(value[key])) {
       expect(value[key]).to.be.bignumber.equal(expected[key]);
     } else {
-      expect(value[key]).to.be.equal(expected[key]);
+      expect(value[key]).to.equal(expected[key]);
     }
   }
 }

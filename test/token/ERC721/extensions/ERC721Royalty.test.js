@@ -32,13 +32,13 @@ contract('ERC721Royalty', function (accounts) {
       await this.token.$_burn(tokenId1);
 
       const tokenInfoA = await this.token.royaltyInfo(tokenId1, salePrice);
-      expect(tokenInfoA[0]).to.be.equal(recipient);
+      expect(tokenInfoA[0]).to.equal(recipient);
       expect(tokenInfoA[1]).to.be.bignumber.equal(salePrice.mul(royalty).divn(1e4));
 
       await this.token.$_mint(account2, tokenId1);
 
       const tokenInfoB = await this.token.royaltyInfo(tokenId1, salePrice);
-      expect(tokenInfoB[0]).to.be.equal(recipient);
+      expect(tokenInfoB[0]).to.equal(recipient);
       expect(tokenInfoB[1]).to.be.bignumber.equal(salePrice.mul(royalty).divn(1e4));
     });
   });

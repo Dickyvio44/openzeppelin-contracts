@@ -83,7 +83,7 @@ contract('ERC721Pausable', function (accounts) {
 
     describe('isApprovedForAll', function () {
       it('returns the approval of the operator', async function () {
-        expect(await this.token.isApprovedForAll(owner, operator)).to.equal(false);
+        expect(await this.token.isApprovedForAll(owner, operator)).to.be.false;
       });
     });
   });

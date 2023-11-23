@@ -27,11 +27,11 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.getBoolean(slot)).to.be.equal(this.value);
+        expect(await this.store.getBoolean(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.getBoolean(otherSlot)).to.be.equal(false);
+        expect(await this.store.getBoolean(otherSlot)).to.be.false;
       });
     });
   });
@@ -51,11 +51,11 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.getAddress(slot)).to.be.equal(this.value);
+        expect(await this.store.getAddress(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.getAddress(otherSlot)).to.be.equal(constants.ZERO_ADDRESS);
+        expect(await this.store.getAddress(otherSlot)).to.equal(constants.ZERO_ADDRESS);
       });
     });
   });
@@ -75,11 +75,11 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.getBytes32(slot)).to.be.equal(this.value);
+        expect(await this.store.getBytes32(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.getBytes32(otherSlot)).to.be.equal(constants.ZERO_BYTES32);
+        expect(await this.store.getBytes32(otherSlot)).to.equal(constants.ZERO_BYTES32);
       });
     });
   });
@@ -123,11 +123,11 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.getString(slot)).to.be.equal(this.value);
+        expect(await this.store.getString(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.getString(otherSlot)).to.be.equal('');
+        expect(await this.store.getString(otherSlot)).to.equal('');
       });
     });
   });
@@ -147,13 +147,13 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.stringMap(slot)).to.be.equal(this.value);
-        expect(await this.store.getStringStorage(slot)).to.be.equal(this.value);
+        expect(await this.store.stringMap(slot)).to.equal(this.value);
+        expect(await this.store.getStringStorage(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.stringMap(otherSlot)).to.be.equal('');
-        expect(await this.store.getStringStorage(otherSlot)).to.be.equal('');
+        expect(await this.store.stringMap(otherSlot)).to.equal('');
+        expect(await this.store.getStringStorage(otherSlot)).to.equal('');
       });
     });
   });
@@ -173,11 +173,11 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.getBytes(slot)).to.be.equal(this.value);
+        expect(await this.store.getBytes(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.getBytes(otherSlot)).to.be.equal(null);
+        expect(await this.store.getBytes(otherSlot)).to.equal(null);
       });
     });
   });
@@ -197,13 +197,13 @@ contract('StorageSlot', function (accounts) {
       });
 
       it('from right slot', async function () {
-        expect(await this.store.bytesMap(slot)).to.be.equal(this.value);
-        expect(await this.store.getBytesStorage(slot)).to.be.equal(this.value);
+        expect(await this.store.bytesMap(slot)).to.equal(this.value);
+        expect(await this.store.getBytesStorage(slot)).to.equal(this.value);
       });
 
       it('from other slot', async function () {
-        expect(await this.store.bytesMap(otherSlot)).to.be.equal(null);
-        expect(await this.store.getBytesStorage(otherSlot)).to.be.equal(null);
+        expect(await this.store.bytesMap(otherSlot)).to.equal(null);
+        expect(await this.store.getBytesStorage(otherSlot)).to.equal(null);
       });
     });
   });

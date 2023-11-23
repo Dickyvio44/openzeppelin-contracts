@@ -21,13 +21,13 @@ contract('ShortStrings', function () {
       it('encode / decode', async function () {
         if (str.length < 32) {
           const encoded = await this.mock.$toShortString(str);
-          expect(decode(encoded)).to.be.equal(str);
+          expect(decode(encoded)).to.equal(str);
 
           const length = await this.mock.$byteLength(encoded);
-          expect(length.toNumber()).to.be.equal(str.length);
+          expect(length.toNumber()).to.equal(str.length);
 
           const decoded = await this.mock.$toString(encoded);
-          expect(decoded).to.be.equal(str);
+          expect(decoded).to.equal(str);
         } else {
           await expectRevertCustomError(this.mock.$toShortString(str), 'StringTooLong', [str]);
         }
@@ -39,16 +39,16 @@ contract('ShortStrings', function () {
 
         const promise = this.mock.$toString(ret0);
         if (str.length < 32) {
-          expect(await promise).to.be.equal(str);
+          expect(await promise).to.equal(str);
         } else {
           await expectRevertCustomError(promise, 'InvalidShortString', []);
         }
 
         const length = await this.mock.$byteLengthWithFallback(ret0, 0);
-        expect(length.toNumber()).to.be.equal(str.length);
+        expect(length.toNumber()).to.equal(str.length);
 
         const recovered = await this.mock.$toStringWithFallback(ret0, 0);
-        expect(recovered).to.be.equal(str);
+        expect(recovered).to.equal(str);
       });
     });
   }

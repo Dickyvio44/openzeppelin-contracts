@@ -30,11 +30,11 @@ contract('Environment sanity', function (accounts) {
     it('cache and mine', async function () {
       blockNumberBefore = await ethers.provider.getBlockNumber();
       await mine();
-      expect(await ethers.provider.getBlockNumber()).to.be.equal(blockNumberBefore + 1);
+      expect(await ethers.provider.getBlockNumber()).to.equal(blockNumberBefore + 1);
     });
 
     it('check snapshot', async function () {
-      expect(await ethers.provider.getBlockNumber()).to.be.equal(blockNumberBefore);
+      expect(await ethers.provider.getBlockNumber()).to.equal(blockNumberBefore);
     });
   });
 });

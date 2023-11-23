@@ -70,7 +70,7 @@ contract('ERC20Votes', function (accounts) {
         describe('call', function () {
           it('delegation with balance', async function () {
             await this.token.$_mint(holder, supply);
-            expect(await this.token.delegates(holder)).to.be.equal(ZERO_ADDRESS);
+            expect(await this.token.delegates(holder)).to.equal(ZERO_ADDRESS);
 
             const { receipt } = await this.token.delegate(holder, { from: holder });
             const timepoint = await clockFromReceipt[mode](receipt);
@@ -86,7 +86,7 @@ contract('ERC20Votes', function (accounts) {
               newVotes: supply,
             });
 
-            expect(await this.token.delegates(holder)).to.be.equal(holder);
+            expect(await this.token.delegates(holder)).to.equal(holder);
 
             expect(await this.token.getVotes(holder)).to.be.bignumber.equal(supply);
             expect(await this.token.getPastVotes(holder, timepoint - 1)).to.be.bignumber.equal('0');
@@ -95,7 +95,7 @@ contract('ERC20Votes', function (accounts) {
           });
 
           it('delegation without balance', async function () {
-            expect(await this.token.delegates(holder)).to.be.equal(ZERO_ADDRESS);
+            expect(await this.token.delegates(holder)).to.equal(ZERO_ADDRESS);
 
             const { receipt } = await this.token.delegate(holder, { from: holder });
             expectEvent(receipt, 'DelegateChanged', {
@@ -105,7 +105,7 @@ contract('ERC20Votes', function (accounts) {
             });
             expectEvent.notEmitted(receipt, 'DelegateVotesChanged');
 
-            expect(await this.token.delegates(holder)).to.be.equal(holder);
+            expect(await this.token.delegates(holder)).to.equal(holder);
           });
         });
 
@@ -133,7 +133,7 @@ contract('ERC20Votes', function (accounts) {
               expiry: MAX_UINT256,
             }).then(data => fromRpcSig(ethSigUtil.signTypedMessage(delegator.getPrivateKey(), { data })));
 
-            expect(await this.token.delegates(delegatorAddress)).to.be.equal(ZERO_ADDRESS);
+            expect(await this.token.delegates(delegatorAddress)).to.equal(ZERO_ADDRESS);
 
             const { receipt } = await this.token.delegateBySig(delegatorAddress, nonce, MAX_UINT256, v, r, s);
             const timepoint = await clockFromReceipt[mode](receipt);
@@ -149,7 +149,7 @@ contract('ERC20Votes', function (accounts) {
               newVotes: supply,
             });
 
-            expect(await this.token.delegates(delegatorAddress)).to.be.equal(delegatorAddress);
+            expect(await this.token.delegates(delegatorAddress)).to.equal(delegatorAddress);
 
             expect(await this.token.getVotes(delegatorAddress)).to.be.bignumber.equal(supply);
             expect(await this.token.getPastVotes(delegatorAddress, timepoint - 1)).to.be.bignumber.equal('0');
@@ -183,8 +183,8 @@ contract('ERC20Votes', function (accounts) {
             const receipt = await this.token.delegateBySig(holderDelegatee, nonce, MAX_UINT256, v, r, s);
             const { args } = receipt.logs.find(({ event }) => event == 'DelegateChanged');
             expect(args.delegator).to.not.be.equal(delegatorAddress);
-            expect(args.fromDelegate).to.be.equal(ZERO_ADDRESS);
-            expect(args.toDelegate).to.be.equal(holderDelegatee);
+            expect(args.fromDelegate).to.equal(ZERO_ADDRESS);
+            expect(args.toDelegate).to.equal(holderDelegatee);
           });
 
           it('rejects bad nonce', async function () {
@@ -234,7 +234,7 @@ contract('ERC20Votes', function (accounts) {
         });
 
         it('call', async function () {
-          expect(await this.token.delegates(holder)).to.be.equal(holder);
+          expect(await this.token.delegates(holder)).to.equal(holder);
 
           const { receipt } = await this.token.delegate(holderDelegatee, { from: holder });
           const timepoint = await clockFromReceipt[mode](receipt);
@@ -255,7 +255,7 @@ contract('ERC20Votes', function (accounts) {
             newVotes: supply,
           });
 
-          expect(await this.token.delegates(holder)).to.be.equal(holderDelegatee);
+          expect(await this.token.delegates(holder)).to.equal(holderDelegatee);
 
           expect(await this.token.getVotes(holder)).to.be.bignumber.equal('0');
           expect(await this.token.getVotes(holderDelegatee)).to.be.bignumber.equal(supply);
@@ -297,7 +297,7 @@ contract('ERC20Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.holderVotes = supply.subn(1);
           this.recipientVotes = '0';
@@ -315,7 +315,7 @@ contract('ERC20Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.holderVotes = '0';
           this.recipientVotes = '1';
@@ -339,7 +339,7 @@ contract('ERC20Votes', function (accounts) {
             receipt.logs
               .filter(({ event }) => event == 'DelegateVotesChanged')
               .every(({ logIndex }) => transferLogIndex < logIndex),
-          ).to.be.equal(true);
+          ).to.be.true;
 
           this.holderVotes = supply.subn(1);
           this.recipientVotes = '1';

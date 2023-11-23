@@ -77,7 +77,7 @@ contract('Create2', function (accounts) {
 
       const instance = await VestingWallet.at(offChainComputed);
 
-      expect(await instance.owner()).to.be.equal(other);
+      expect(await instance.owner()).to.equal(other);
     });
 
     it('deploys a contract with funds deposited in the factory', async function () {

@@ -21,7 +21,7 @@ module.exports = function shouldBehaveLikeProxy(createProxy, accounts) {
     it('sets the implementation address', async function () {
       const implementationSlot = await getSlot(this.proxy, ImplementationSlot);
       const implementationAddress = web3.utils.toChecksumAddress(implementationSlot.substr(-40));
-      expect(implementationAddress).to.be.equal(this.implementation);
+      expect(implementationAddress).to.equal(this.implementation);
     });
 
     it('initializes the proxy', async function () {

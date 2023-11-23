@@ -66,7 +66,7 @@ contract('Time', function () {
         expect(packed).to.be.bignumber.equal(delay.toString());
 
         const packed2 = packDelay({ valueBefore, valueAfter, effect });
-        expect(packed2).to.be.equal(delay);
+        expect(packed2).to.equal(delay);
       });
 
       it('unpack', async function () {

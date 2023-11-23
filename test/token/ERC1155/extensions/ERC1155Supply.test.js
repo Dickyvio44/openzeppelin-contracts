@@ -23,7 +23,7 @@ contract('ERC1155Supply', function (accounts) {
 
   context('before mint', function () {
     it('exist', async function () {
-      expect(await this.token.exists(firstTokenId)).to.be.equal(false);
+      expect(await this.token.exists(firstTokenId)).to.be.false;
     });
 
     it('totalSupply', async function () {
@@ -39,7 +39,7 @@ contract('ERC1155Supply', function (accounts) {
       });
 
       it('exist', async function () {
-        expect(await this.token.exists(firstTokenId)).to.be.equal(true);
+        expect(await this.token.exists(firstTokenId)).to.be.true;
       });
 
       it('totalSupply', async function () {
@@ -54,8 +54,8 @@ contract('ERC1155Supply', function (accounts) {
       });
 
       it('exist', async function () {
-        expect(await this.token.exists(firstTokenId)).to.be.equal(true);
-        expect(await this.token.exists(secondTokenId)).to.be.equal(true);
+        expect(await this.token.exists(firstTokenId)).to.be.true;
+        expect(await this.token.exists(secondTokenId)).to.be.true;
       });
 
       it('totalSupply', async function () {
@@ -76,7 +76,7 @@ contract('ERC1155Supply', function (accounts) {
       });
 
       it('exist', async function () {
-        expect(await this.token.exists(firstTokenId)).to.be.equal(false);
+        expect(await this.token.exists(firstTokenId)).to.be.false;
       });
 
       it('totalSupply', async function () {
@@ -92,8 +92,8 @@ contract('ERC1155Supply', function (accounts) {
       });
 
       it('exist', async function () {
-        expect(await this.token.exists(firstTokenId)).to.be.equal(false);
-        expect(await this.token.exists(secondTokenId)).to.be.equal(false);
+        expect(await this.token.exists(firstTokenId)).to.be.false;
+        expect(await this.token.exists(secondTokenId)).to.be.false;
       });
 
       it('totalSupply', async function () {
