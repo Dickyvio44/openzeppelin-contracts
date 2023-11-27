@@ -200,7 +200,7 @@ contract('ERC20Wrapper', function (accounts) {
     });
   });
 
-  describe('erc20 behaviour', function () {
+  describe('erc20 behavior', function () {
     beforeEach(async function () {
       await this.underlying.approve(this.token.address, initialSupply, { from: initialHolder });
       await this.token.depositFor(initialHolder, initialSupply, { from: initialHolder });

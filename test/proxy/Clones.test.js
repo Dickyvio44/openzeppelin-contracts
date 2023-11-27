@@ -3,7 +3,7 @@ const { expectEvent } = require('@openzeppelin/test-helpers');
 const { expect } = require('chai');
 const { expectRevertCustomError } = require('../helpers/customError');
 
-const shouldBehaveLikeClone = require('./Clones.behaviour');
+const shouldBehaveLikeClone = require('./Clones.behavior');
 
 const Clones = artifacts.require('$Clones');
 

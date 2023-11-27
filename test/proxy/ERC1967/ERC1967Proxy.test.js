@@ -1,4 +1,4 @@
-const shouldBehaveLikeProxy = require('../Proxy.behaviour');
+const shouldBehaveLikeProxy = require('../Proxy.behavior');
 
 const ERC1967Proxy = artifacts.require('ERC1967Proxy');
 
