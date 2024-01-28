@@ -20,10 +20,10 @@ describe('ERC20Capped', function () {
   });
 
   it('requires a non-zero cap', async function () {
-    const ERC20Capped = await ethers.getContractFactory('$ERC20Capped');
+    const { interface } = await ethers.getContractFactory('$ERC20Capped');
 
-    await expect(ERC20Capped.deploy(name, symbol, 0))
-      .to.be.revertedWithCustomError(ERC20Capped, 'ERC20InvalidCap')
+    await expect(ethers.deployContract('$ERC20Capped', [name, symbol, 0]))
+      .to.be.revertedWithCustomError({ interface }, 'ERC20InvalidCap')
       .withArgs(0);
   });
 

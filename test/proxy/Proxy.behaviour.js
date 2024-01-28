@@ -6,8 +6,10 @@ const { getAddressInSlot, ImplementationSlot } = require('../helpers/storage');
 module.exports = function shouldBehaveLikeProxy() {
   it('cannot be initialized with a non-contract address', async function () {
     const initializeData = '0x';
+    const { interface } = await ethers.getContractFactory('ERC1967Proxy');
+
     await expect(this.createProxy(this.nonContractAddress, initializeData))
-      .to.be.revertedWithCustomError(await ethers.getContractFactory('ERC1967Proxy'), 'ERC1967InvalidImplementation')
+      .to.be.revertedWithCustomError({ interface }, 'ERC1967InvalidImplementation')
       .withArgs(this.nonContractAddress);
   });
 

@@ -196,12 +196,20 @@ describe('Initializable', function () {
   });
 
   describe('disabling initialization', function () {
-    it('old and new patterns in bad sequence', async function () {
-      const DisableBad1 = await ethers.getContractFactory('DisableBad1');
-      await expect(DisableBad1.deploy()).to.be.revertedWithCustomError(DisableBad1, 'InvalidInitialization');
+    it('old and new patterns in bad sequence #1', async function () {
+      const { interface } = await ethers.getContractFactory('DisableBad1');
+      await expect(ethers.deployContract('DisableBad1')).to.be.revertedWithCustomError(
+        { interface },
+        'InvalidInitialization',
+      );
+    });
 
-      const DisableBad2 = await ethers.getContractFactory('DisableBad2');
-      await expect(DisableBad2.deploy()).to.be.revertedWithCustomError(DisableBad2, 'InvalidInitialization');
+    it('old and new patterns in bad sequence #2', async function () {
+      const { interface } = await ethers.getContractFactory('DisableBad2');
+      await expect(ethers.deployContract('DisableBad2')).to.be.revertedWithCustomError(
+        { interface },
+        'InvalidInitialization',
+      );
     });
 
     it('old and new patterns in good sequence', async function () {
