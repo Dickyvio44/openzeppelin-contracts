@@ -112,6 +112,8 @@ describe('Create2', function () {
     it('fails deploying a contract in an existent address', async function () {
       await expect(this.factory.$deploy(0n, saltHex, this.constructorByteCode)).to.emit(this.factory, 'return$deploy');
 
+      // This causes the hardhat "Failed to generate 1 stack trace" error.
+      // See https://github.com/NomicFoundation/hardhat/issues/4569
       await expect(this.factory.$deploy(0n, saltHex, this.constructorByteCode)).to.be.revertedWithCustomError(
         this.factory,
         'Create2FailedDeployment',
