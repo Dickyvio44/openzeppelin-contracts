@@ -4,7 +4,8 @@ pragma solidity ^0.8.20;
 
 import {PackedUserOperation, IAccount, IEntryPoint} from "../../interfaces/IERC4337.sol";
 import {SignatureChecker} from "../../utils/cryptography/SignatureChecker.sol";
-import {ERC4337Utils} from "./../utils/ERC4337Utils.sol";
+import {Math} from "../../utils/math/Math.sol";
+import {ERC4337Utils} from "../utils/ERC4337Utils.sol";
 
 abstract contract Account is IAccount {
     error AccountEntryPointRestricted();
@@ -46,6 +47,16 @@ abstract contract Account is IAccount {
         bytes memory signature,
         bytes32 userOpHash
     ) internal virtual returns (address, uint48, uint48);
+
+    /**
+     * @dev Return 0 if the account is not operating in multisig mode. Otherwize, returns the number of required
+     * signatures. If multiple signatures are required, the PackedUserOperation.signature field must be encoded as an
+     * of bytes[], so that all signatures can be retrieved using `abi.decode(userOp.signature, (bytes[]))`. The array
+     * of signatures must be sorted in increassing order of signers.
+     */
+    function _multisig(PackedUserOperation calldata) internal virtual returns (uint256) {
+        return 0;
+    }
 
     /****************************************************************************************************************
      *                                               Public interface                                               *
@@ -98,8 +109,51 @@ abstract contract Account is IAccount {
         PackedUserOperation calldata userOp,
         bytes32 userOpHash
     ) internal virtual returns (uint256 validationData) {
-        (address signer, uint48 validAfter, uint48 validUntil) = _processSignature(userOp.signature, userOpHash);
-        return ERC4337Utils.packValidationData(signer != address(0) && _isAuthorized(signer), validAfter, validUntil);
+        uint256 multisig = _multisig(userOp);
+
+        if (multisig == 0) {
+            // not operating in multisig mode:
+            // - process userOp.signature as a single signature
+            // - check signer authorization
+            // - return validation data
+            (address signer, uint48 validAfter, uint48 validUntil) = _processSignature(userOp.signature, userOpHash);
+            return
+                signer != address(0) && _isAuthorized(signer)
+                    ? ERC4337Utils.packValidationData(true, validAfter, validUntil)
+                    : ERC4337Utils.SIG_VALIDATION_FAILED;
+        } else {
+            // operating in multisig mode:
+            // - parse userOp.signature as an array of signatures
+            // - validate the length of the array
+            // - for each signature
+            //   - check ordering (to avoid duplicate) and authorization
+            //   - update validity constraints
+            // - return validation data
+            bytes[] memory signatures = abi.decode(userOp.signature, (bytes[]));
+
+            if (signatures.length < multisig) {
+                return ERC4337Utils.SIG_VALIDATION_FAILED;
+            }
+
+            address lastSigner = address(0);
+            uint48 globalValidAfter = 0;
+            uint48 globalValidUntil = 0;
+            for (uint256 i = 0; i < signatures.length; ++i) {
+                (address signer, uint48 validAfter, uint48 validUntil) = _processSignature(signatures[i], userOpHash);
+                if (_isAuthorized(signer) && signer > lastSigner) {
+                    lastSigner = signer;
+                    globalValidAfter = uint48(
+                        Math.ternary(validAfter < globalValidAfter, globalValidAfter, validAfter)
+                    );
+                    globalValidUntil = uint48(
+                        Math.ternary(validUntil > globalValidUntil || validUntil == 0, globalValidUntil, validUntil)
+                    );
+                } else {
+                    return ERC4337Utils.SIG_VALIDATION_FAILED;
+                }
+            }
+            return ERC4337Utils.packValidationData(true, globalValidAfter, globalValidUntil);
+        }
     }
 
     /**

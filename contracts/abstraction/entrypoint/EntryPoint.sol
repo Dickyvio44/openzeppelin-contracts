@@ -11,8 +11,8 @@ import {Call} from "../../utils/Call.sol";
 import {Memory} from "../../utils/Memory.sol";
 import {NoncesWithKey} from "../../utils/NoncesWithKey.sol";
 import {ReentrancyGuard} from "../../utils/ReentrancyGuard.sol";
-import {ERC4337Utils} from "./../utils/ERC4337Utils.sol";
-import {SenderCreationHelper} from "./../utils/SenderCreationHelper.sol";
+import {ERC4337Utils} from "../utils/ERC4337Utils.sol";
+import {SenderCreationHelper} from "../utils/SenderCreationHelper.sol";
 
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.

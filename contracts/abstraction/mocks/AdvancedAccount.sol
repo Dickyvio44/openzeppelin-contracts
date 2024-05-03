@@ -8,11 +8,10 @@ import {ERC721Holder} from "../../token/ERC721/utils/ERC721Holder.sol";
 import {ERC1155Holder} from "../../token/ERC1155/utils/ERC1155Holder.sol";
 import {Address} from "../../utils/Address.sol";
 import {Account} from "../account/Account.sol";
-import {AccountMultisig} from "../account/modules/AccountMultisig.sol";
 import {AccountECDSA} from "../account/modules/AccountECDSA.sol";
 import {AccountP256} from "../account/modules/AccountP256.sol";
 
-abstract contract AdvancedAccount is AccountMultisig, AccessControl, ERC721Holder, ERC1155Holder {
+abstract contract AdvancedAccount is Account, AccessControl, ERC721Holder, ERC1155Holder {
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
 
     IEntryPoint private immutable _entryPoint;
@@ -40,9 +39,7 @@ abstract contract AdvancedAccount is AccountMultisig, AccessControl, ERC721Holde
         return _entryPoint;
     }
 
-    function requiredSignatures(
-        PackedUserOperation calldata /*userOp*/
-    ) public view virtual override returns (uint256) {
+    function _multisig(PackedUserOperation calldata /*userOp*/) internal view virtual override returns (uint256) {
         return _requiredSignatures;
     }
 
@@ -82,15 +79,10 @@ contract AdvancedAccountECDSA is AdvancedAccount, AccountECDSA {
         uint256 requiredSignatures_
     ) AdvancedAccount(entryPoint_, admin_, signers_, requiredSignatures_) {}
 
-    function _validateSignature(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override(Account, AccountMultisig) returns (uint256 validationData) {
-        // In this mock, calling super would work, but it may not depending on how the function is overriden by other
-        // modules. Using a more explicit override may bypass additional modules though.
-        //
-        // If possible, this should be improved.
-        return AccountMultisig._validateSignature(userOp, userOpHash);
+    function _multisig(
+        PackedUserOperation calldata userOp
+    ) internal view virtual override(Account, AdvancedAccount) returns (uint256) {
+        return super._multisig(userOp);
     }
 }
 
@@ -102,14 +94,9 @@ contract AdvancedAccountP256 is AdvancedAccount, AccountP256 {
         uint256 requiredSignatures_
     ) AdvancedAccount(entryPoint_, admin_, signers_, requiredSignatures_) {}
 
-    function _validateSignature(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash
-    ) internal virtual override(Account, AccountMultisig) returns (uint256 validationData) {
-        // In this mock, calling super would work, but it may not depending on how the function is overriden by other
-        // modules. Using a more explicit override may bypass additional modules though.
-        //
-        // If possible, this should be improved.
-        return AccountMultisig._validateSignature(userOp, userOpHash);
+    function _multisig(
+        PackedUserOperation calldata userOp
+    ) internal view virtual override(Account, AdvancedAccount) returns (uint256) {
+        return super._multisig(userOp);
     }
 }
