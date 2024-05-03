@@ -6,6 +6,8 @@ import {IEntryPoint, IEntryPointNonces, IEntryPointStake, IAccount, IAccountExec
 import {IERC165} from "../../interfaces/IERC165.sol";
 import {ERC20} from "../../token/ERC20/ERC20.sol";
 import {ERC165} from "../../utils/introspection/ERC165.sol";
+import {SafeCast} from "../../utils/math/SafeCast.sol";
+import {Time} from "../../utils/types/Time.sol";
 import {Address} from "../../utils/Address.sol";
 import {Call} from "../../utils/Call.sol";
 import {Memory} from "../../utils/Memory.sol";
@@ -60,6 +62,19 @@ contract EntryPoint is IEntryPoint, ERC20("EntryPoint Deposit", "EPD"), ERC165, 
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
 
+    // Staking
+    struct StakeInfo {
+        uint176 stake;
+        uint32 unstakeDelaySec;
+        uint48 withdrawTime;
+    }
+
+    mapping(address => StakeInfo) private _stakes;
+
+    /****************************************************************************************************************
+     *                                                  Functions                                                   *
+     ****************************************************************************************************************/
+
     // ERC165: TODO
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
@@ -102,21 +117,56 @@ contract EntryPoint is IEntryPoint, ERC20("EntryPoint Deposit", "EPD"), ERC165, 
     }
 
     /// @inheritdoc IEntryPointStake
-    function addStake(uint32 /*unstakeDelaySec*/) public payable virtual {
-        // TODO: implement
-        revert("Stake not Implemented yet");
+    function addStake(uint32 unstakeDelaySec) public payable virtual {
+        StakeInfo storage info = _stakes[msg.sender];
+
+        // check delay validity
+        require(unstakeDelaySec > 0, "must specify unstake delay");
+        require(unstakeDelaySec >= info.unstakeDelaySec, "cannot decrease unstake time");
+
+        // check stake validity
+        uint176 stake = info.stake + SafeCast.toUint176(msg.value);
+        require(stake > 0, "no stake specified");
+
+        // automatically relocks if unlock is pending
+        _stakes[msg.sender] = StakeInfo(stake, unstakeDelaySec, 0);
+
+        // TODO: emit event
     }
 
     /// @inheritdoc IEntryPointStake
-    function unlockStake() public pure virtual {
-        // TODO: implement and remove pure
-        revert("Stake not Implemented yet");
+    function unlockStake() public virtual {
+        StakeInfo storage info = _stakes[msg.sender];
+        uint32 unstakeDelaySec = info.unstakeDelaySec;
+        uint48 withdrawTime = info.withdrawTime;
+
+        // check account is staked an locked
+        require(withdrawTime == 0, "already unstaking");
+        require(unstakeDelaySec != 0, "not staked");
+
+        // set unlock timepoint
+        info.withdrawTime = Time.timestamp() + unstakeDelaySec;
+
+        // TODO: emit event
     }
 
     /// @inheritdoc IEntryPointStake
-    function withdrawStake(address payable /*withdrawAddress*/) public pure virtual {
-        // TODO: implement and remove pure
-        revert("Stake not Implemented yet");
+    function withdrawStake(address payable withdrawAddress) public virtual {
+        StakeInfo storage info = _stakes[msg.sender];
+        uint176 stake = info.stake;
+        uint48 withdrawTime = info.withdrawTime;
+
+        // check unlocked and passed
+        require(withdrawTime > 0, "must call unlockStake() first");
+        require(withdrawTime <= Time.timestamp(), "Stake withdrawal is not due");
+
+        // cleanup
+        delete _stakes[msg.sender];
+
+        // release funds
+        Address.sendValue(withdrawAddress, stake);
+
+        // TODO: emit event
     }
 
     /****************************************************************************************************************
