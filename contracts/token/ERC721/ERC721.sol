@@ -25,13 +25,19 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
     // Token symbol
     string private _symbol;
 
-    mapping(uint256 tokenId => address) private _owners;
+    struct TokenDetails {
+        address owner;
+        address approval;
+    }
 
-    mapping(address owner => uint256) private _balances;
+    struct AccountDetails {
+        uint256 balance;
+        mapping(address => bool) operators;
+    }
 
-    mapping(uint256 tokenId => address) private _tokenApprovals;
+    mapping(uint256 tokenId => TokenDetails) private _tokens;
 
-    mapping(address owner => mapping(address operator => bool)) private _operatorApprovals;
+    mapping(address owner => AccountDetails) private _accounts;
 
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
@@ -58,7 +64,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
         }
-        return _balances[owner];
+        return _accounts[owner].balance;
     }
 
     /**
@@ -128,7 +134,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      * @dev See {IERC721-isApprovedForAll}.
      */
     function isApprovedForAll(address owner, address operator) public view virtual returns (bool) {
-        return _operatorApprovals[owner][operator];
+        return _accounts[owner].operators[operator];
     }
 
     /**
@@ -170,14 +176,14 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      * `balanceOf(a)` must be equal to the number of tokens such that `_ownerOf(tokenId)` is `a`.
      */
     function _ownerOf(uint256 tokenId) internal view virtual returns (address) {
-        return _owners[tokenId];
+        return _tokens[tokenId].owner;
     }
 
     /**
      * @dev Returns the approved address for `tokenId`. Returns 0 if `tokenId` is not minted.
      */
     function _getApproved(uint256 tokenId) internal view virtual returns (address) {
-        return _tokenApprovals[tokenId];
+        return _tokens[tokenId].approval;
     }
 
     /**
@@ -224,7 +230,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      */
     function _increaseBalance(address account, uint128 value) internal virtual {
         unchecked {
-            _balances[account] += value;
+            _accounts[account].balance += value;
         }
     }
 
@@ -253,17 +259,17 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
             _approve(address(0), tokenId, address(0), false);
 
             unchecked {
-                _balances[from] -= 1;
+                _accounts[from].balance -= 1;
             }
         }
 
         if (to != address(0)) {
             unchecked {
-                _balances[to] += 1;
+                _accounts[to].balance += 1;
             }
         }
 
-        _owners[tokenId] = to;
+        _tokens[tokenId].owner = to;
 
         emit Transfer(from, to, tokenId);
 
@@ -421,7 +427,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
             }
         }
 
-        _tokenApprovals[tokenId] = to;
+        _tokens[tokenId].approval = to;
     }
 
     /**
@@ -436,7 +442,7 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         if (operator == address(0)) {
             revert ERC721InvalidOperator(operator);
         }
-        _operatorApprovals[owner][operator] = approved;
+        _accounts[owner].operators[operator] = approved;
         emit ApprovalForAll(owner, operator, approved);
     }
 
