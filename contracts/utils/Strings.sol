@@ -6,11 +6,13 @@ pragma solidity ^0.8.20;
 import {Math} from "./math/Math.sol";
 import {SafeCast} from "./math/SafeCast.sol";
 import {SignedMath} from "./math/SignedMath.sol";
+import {Bytes} from "./Bytes.sol";
 
 /**
  * @dev String operations.
  */
 library Strings {
+    using Bytes for bytes;
     using SafeCast for *;
 
     bytes16 private constant HEX_DIGITS = "0123456789abcdef";
@@ -133,7 +135,7 @@ library Strings {
      * @dev Parse a decimal string and returns the value as a `uint256`.
      *
      * Requirements:
-     * - The provided string must include only ASCII characters in the range of [0-9]
+     * - The string must be formatted as `[0-9]*`
      * - The result must fit into an `uint256` type
      */
     function parseUint(string memory input) internal pure returns (uint256) {
@@ -143,6 +145,10 @@ library Strings {
     /**
      * @dev Variant of {parseUint} that parses a substring of `input` located between position `begin` (included) and
      * `end` (excluded).
+     *
+     * Requirements:
+     * - The substring must be formatted as `[0-9]*`
+     * - The result must fit into an `uint256` type
      */
     function parseUint(string memory input, uint256 begin, uint256 end) internal pure returns (uint256) {
         (bool success, uint256 value) = tryParseUint(input, begin, end);
@@ -188,10 +194,8 @@ library Strings {
      * @dev Parse a decimal string and returns the value as a `int256`.
      *
      * Requirements:
-     * - The provided string must contain only ASCII characters in the range of [0-9] (excluding the negative sign prefix).
+     * - The string must be formatted as `[-+]?[0-9]*`
      * - The result must fit in an `int256` type.
-     *
-     * NOTE: This function does not accept strings with a plus sign prefix (i.e. `+`)
      */
     function parseInt(string memory input) internal pure returns (int256) {
         return parseInt(input, 0, bytes(input).length);
@@ -200,6 +204,10 @@ library Strings {
     /**
      * @dev Variant of {parseInt-string} that parses a substring of `input` located between position `begin` (included) and
      * `end` (excluded).
+     *
+     * Requirements:
+     * - The substring must be formatted as `[-+]?[0-9]*`
+     * - The result must fit in an `int256` type.
      */
     function parseInt(string memory input, uint256 begin, uint256 end) internal pure returns (int256) {
         (bool success, int256 value) = tryParseInt(input, begin, end);
@@ -231,9 +239,10 @@ library Strings {
         bytes memory buffer = bytes(input);
 
         // check presence of a negative sign.
-        bool isNegative = bytes1(unsafeReadBytesOffset(buffer, begin)) == 0x2d;
-        int8 factor = isNegative ? int8(-1) : int8(1);
-        uint256 offset = isNegative.toUint();
+        bool positiveSign = bytes1(buffer.unsafeReadBytesOffset(begin)) == bytes1("+");
+        bool negativeSign = bytes1(buffer.unsafeReadBytesOffset(begin)) == bytes1("-");
+        uint256 offset = (positiveSign || negativeSign).toUint();
+        int8 factor = negativeSign ? int8(-1) : int8(1);
 
         int256 result = 0;
         for (uint256 i = begin + offset; i < end; ++i) {
@@ -249,7 +258,7 @@ library Strings {
      * @dev Parse a hexadecimal string (with or without "0x" prefix), and returns the value as a `uint256`.
      *
      * Requirements:
-     * - The provided string must contain only ASCII characters in [0-9a-fA-F] (excluding the negative sign prefix).
+     * - The string must be formatted as `(0x)?[0-9a-fA-F]*`
      * - The result must fit in an `uint256` type.
      */
     function parseHex(string memory input) internal pure returns (uint256) {
@@ -259,6 +268,10 @@ library Strings {
     /**
      * @dev Variant of {parseHex} that parses a substring of `input` located between position `begin` (included) and
      * `end` (excluded).
+     *
+     * Requirements:
+     * - The substring must be formatted as `(0x)?[0-9a-fA-F]*`
+     * - The result must fit in an `uint256` type.
      */
     function parseHex(string memory input, uint256 begin, uint256 end) internal pure returns (uint256) {
         (bool success, uint256 value) = tryParseHex(input, begin, end);
@@ -291,7 +304,7 @@ library Strings {
         bytes memory buffer = bytes(input);
 
         // skip 0x prefix if present
-        bool hasPrefix = bytes2(unsafeReadBytesOffset(buffer, begin)) == bytes2("0x");
+        bool hasPrefix = bytes2(buffer.unsafeReadBytesOffset(begin)) == bytes2("0x");
         uint256 offset = hasPrefix.toUint() * 2;
 
         uint256 result = 0;
@@ -317,6 +330,9 @@ library Strings {
     /**
      * @dev Variant of {parseAddress} that parses a substring of `input` located between position `begin` (included) and
      * `end` (excluded).
+     *
+     * Requirements:
+     * - The substring must be formatted as `(0x)?[0-9a-fA-F]{40}`
      */
     function parseAddress(string memory input, uint256 begin, uint256 end) internal pure returns (address) {
         (bool success, address value) = tryParseAddress(input, begin, end);
@@ -342,7 +358,7 @@ library Strings {
         uint256 end
     ) internal pure returns (bool success, address value) {
         // check that input is the correct length
-        bool hasPrefix = bytes2(unsafeReadBytesOffset(bytes(input), begin)) == 0x3078;
+        bool hasPrefix = bytes2(bytes(input).unsafeReadBytesOffset(begin)) == 0x3078;
         uint256 expectedLength = 40 + hasPrefix.toUint() * 2;
 
         if (end - begin == expectedLength) {
@@ -351,13 +367,6 @@ library Strings {
             return (s, address(uint160(v)));
         } else {
             return (false, address(0));
-        }
-    }
-
-    // TODO: documentation.
-    function unsafeReadBytesOffset(bytes memory buffer, uint256 offset) internal pure returns (bytes32 value) {
-        assembly ("memory-safe") {
-            value := mload(add(buffer, add(0x20, offset)))
         }
     }
 

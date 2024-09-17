@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Math} from "../math/Math.sol";
+import {Bytes} from "../Bytes.sol";
 
 /**
  * @dev RSA PKCS#1 v1.5 signature verification implementation according to https://datatracker.ietf.org/doc/html/rfc8017[RFC8017].
@@ -13,6 +14,8 @@ import {Math} from "../math/Math.sol";
  * Inspired by https://github.com/adria0/SolRsaVerify[Adrià Massanet's work]
  */
 library RSA {
+    using Bytes for bytes;
+
     /**
      * @dev Same as {pkcs1} but using SHA256 to calculate the digest of `data`.
      */
@@ -54,8 +57,8 @@ library RSA {
             // Verify that s < n to ensure there's only one valid signature for a given message
             for (uint256 i = 0; i < length; i += 0x20) {
                 uint256 p = Math.min(i, length - 0x20);
-                bytes32 sp = _unsafeReadBytes32(s, p);
-                bytes32 np = _unsafeReadBytes32(n, p);
+                bytes32 sp = s.unsafeReadBytesOffset(p);
+                bytes32 np = n.unsafeReadBytesOffset(p);
                 if (sp < np) {
                     // s < n in the upper bits (everything before is equal) → s < n globally: ok
                     break;
@@ -94,13 +97,13 @@ library RSA {
             // it should be at 32 (digest) + 2 bytes from the end. To those 34 bytes, we add the
             // OID (9 bytes) and its length (2 bytes) to get the position of the DigestInfo sequence,
             // which is expected to have a length of 0x31 when the NULL param is present or 0x2f if not.
-            if (bytes1(_unsafeReadBytes32(buffer, length - 50)) == 0x31) {
+            if (bytes1(buffer.unsafeReadBytesOffset(length - 50)) == 0x31) {
                 offset = 0x34;
                 // 00 (1 byte) | SEQUENCE length (0x31) = 3031 (2 bytes) | SEQUENCE length (0x0d) = 300d (2 bytes) | OBJECT_IDENTIFIER length (0x09) = 0609 (2 bytes)
                 // SHA256 OID = 608648016503040201 (9 bytes) | NULL = 0500 (2 bytes) (explicit) | OCTET_STRING length (0x20) = 0420 (2 bytes)
                 params = 0x003031300d060960864801650304020105000420000000000000000000000000;
                 mask = 0xffffffffffffffffffffffffffffffffffffffff000000000000000000000000; // (20 bytes)
-            } else if (bytes1(_unsafeReadBytes32(buffer, length - 48)) == 0x2F) {
+            } else if (bytes1(buffer.unsafeReadBytesOffset(length - 48)) == 0x2F) {
                 offset = 0x32;
                 // 00 (1 byte) | SEQUENCE length (0x2f) = 302f (2 bytes) | SEQUENCE length (0x0b) = 300b (2 bytes) | OBJECT_IDENTIFIER length (0x09) = 0609 (2 bytes)
                 // SHA256 OID = 608648016503040201 (9 bytes) | NULL = <implicit> | OCTET_STRING length (0x20) = 0420 (2 bytes)
@@ -119,27 +122,18 @@ library RSA {
             // use the padding to manipulate the message in order to create a valid signature out of
             // multiple valid signatures.
             for (uint256 i = 2; i < paddingEnd; ++i) {
-                if (bytes1(_unsafeReadBytes32(buffer, i)) != 0xFF) {
+                if (bytes1(buffer.unsafeReadBytesOffset(i)) != 0xFF) {
                     return false;
                 }
             }
 
             // All the other parameters are small enough to fit in a bytes32, so we can check them directly.
             return
-                bytes2(0x0001) == bytes2(_unsafeReadBytes32(buffer, 0x00)) && // 00 | 01
+                bytes2(0x0001) == bytes2(buffer.unsafeReadBytesOffset(0x00)) && // 00 | 01
                 // PS was checked in the loop
-                params == _unsafeReadBytes32(buffer, paddingEnd) & mask && // DigestInfo
+                params == buffer.unsafeReadBytesOffset(paddingEnd) & mask && // DigestInfo
                 // Optional parameters are not checked
-                digest == _unsafeReadBytes32(buffer, length - 0x20); // Digest
-        }
-    }
-
-    /// @dev Reads a bytes32 from a bytes array without bounds checking.
-    function _unsafeReadBytes32(bytes memory array, uint256 offset) private pure returns (bytes32 result) {
-        // Memory safetiness is guaranteed as long as the provided `array` is a Solidity-allocated bytes array
-        // and `offset` is within bounds. This is the case for all calls to this private function from {pkcs1}.
-        assembly ("memory-safe") {
-            result := mload(add(add(array, 0x20), offset))
+                digest == buffer.unsafeReadBytesOffset(length - 0x20); // Digest
         }
     }
 }
